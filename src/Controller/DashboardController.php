@@ -13,7 +13,7 @@ class DashboardController extends AbstractController
     public function index(EntrepriseRepository $entrepriseRepository): Response
     {
         return $this->render('dashboard/index.html.twig', [
-            'entreprises' => $entrepriseRepository->findAll(),
+            'entreprises' => $entrepriseRepository->findAll(), // On récupère toutes les entreprises
         ]);
     }
 }
