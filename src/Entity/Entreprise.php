@@ -17,26 +17,20 @@ class Entreprise
     #[ORM\Column(name: "ENT_RS", type: "string", length: 50, nullable: true)]
     private ?string $rs = null;
 
-    #[ORM\Column(name: "ENT_ADRESSE", type: "string", length: 32, nullable: true)]
+    #[ORM\Column(name: "ENT_ADRESSE", type: "string", length: 100, nullable: true)]
     private ?string $adresse = null;
 
     #[ORM\Column(name: "ENT_CP", type: "string", length: 5, nullable: true)]
     private ?string $cp = null;
 
-    #[ORM\Column(name: "ENT_VILLE", type: "string", length: 32, nullable: true)]
+    #[ORM\Column(name: "ENT_VILLE", type: "string", length: 50, nullable: true)]
     private ?string $ville = null;
 
-    #[ORM\Column(name: "ENT_TUTEUR", type: "string", length: 32, nullable: true)]
-    private ?string $tuteur = null;
+    #[ORM\Column(name: "ENT_TEL", type: "string", length: 20, nullable: true)]
+    private ?string $tel = null;
 
-    #[ORM\Column(name: "ENT_PROFIL", type: "string", length: 32, nullable: true)]
-    private ?string $profil = null;
-
-    #[ORM\Column(name: "ENT_ETUDIANT", type: "string", length: 32, nullable: true)]
-    private ?string $etudiant = null;
-
-    #[ORM\Column(name: "ENT_JURY", type: "string", length: 32, nullable: true)]
-    private ?string $jury = null;
+    #[ORM\Column(name: "ENT_MAIL", type: "string", length: 50, nullable: true)]
+    private ?string $mail = null;
 
     public function getId(): ?int
     {
@@ -87,47 +81,25 @@ class Entreprise
         return $this;
     }
 
-    public function getTuteur(): ?string
+    public function getTel(): ?string
     {
-        return $this->tuteur;
+        return $this->tel;
     }
 
-    public function setTuteur(?string $tuteur): self
+    public function setTel(?string $tel): self
     {
-        $this->tuteur = $tuteur;
+        $this->tel = $tel;
         return $this;
     }
 
-    public function getProfil(): ?string
+    public function getMail(): ?string
     {
-        return $this->profil;
+        return $this->mail;
     }
 
-    public function setProfil(?string $profil): self
+    public function setMail(?string $mail): self
     {
-        $this->profil = $profil;
-        return $this;
-    }
-
-    public function getEtudiant(): ?string
-    {
-        return $this->etudiant;
-    }
-
-    public function setEtudiant(?string $etudiant): self
-    {
-        $this->etudiant = $etudiant;
-        return $this;
-    }
-
-    public function getJury(): ?string
-    {
-        return $this->jury;
-    }
-
-    public function setJury(?string $jury): self
-    {
-        $this->jury = $jury;
+        $this->mail = $mail;
         return $this;
     }
 }
