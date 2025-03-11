@@ -5,7 +5,8 @@
 {% block body %}
     <h2>Liste des entreprises</h2>
 
-    {% if entreprises|length > 0 %}
+    {# Vérifie si le tableau des entreprises contient au moins une entrée avant d'afficher le tableau #}
+    {% if entreprises|length > 0 %} 
         <table border="1">
             <thead>
                 <tr>
