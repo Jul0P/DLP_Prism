@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Prism - Connexion{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block body %}
+    <h1>Connexion</h1>
+
+    {% if error %}
+        {# Affichage du message d'erreur #}
+        {# TODO: améliorer l'affichage des erreurs #}
+        <div class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ path('app_login') }}">
+        <div>
+            <label for="username">Email</label>
+            {# TODO: vérifier l'intérêt de la valeur par défaut #}
+            <input type="email" name="_username" id="username" value="{{ last_username ?? '' }}" required>
+        </div>
+        <div>
+            <label for="password">Mot de passe</label>
+            <input type="password" name="_password" id="password" required>
+        </div>
+        {# Ajout du champ caché pour le jeton CSRF #}
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}"> 
+        <button type="submit">Se connecter</button>
+    </form>
+{% endblock %}
+
+{% block footer %}{% endblock %}

@@ -4,6 +4,14 @@ controllers:
         namespace: App\Controller
     type: attribute
 
-dashboard:
+app_dashboard:
     path: /
     controller: App\Controller\DashboardController::index
+
+app_login:
+    path: /login
+    controller: App\Controller\AuthController::login
+
+app_logout:
+    path: /logout
+    controller: App\Controller\AuthController::logout
