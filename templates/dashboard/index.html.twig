@@ -5,6 +5,10 @@
 {% block body %}
     <h2>Liste des entreprises</h2>
 
+    {% if is_granted('ROLE_ADMIN') %}
+        <p>Seul un admin peut voir ce texte</p>
+    {% endif %}
+
     {# Vérifie si le tableau des entreprises contient au moins une entrée avant d'afficher le tableau #}
     {% if entreprises|length > 0 %} 
         <table border="1">

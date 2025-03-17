@@ -22,18 +22,31 @@ class CreateUserCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // Créer un admin
         $user = new User();
         $user->setEmail('jules.parents@gmail.com');
         $user->setNom('Parents');
         $user->setPrenom('Jules');
         $hashedPassword = $this->passwordHasher->hashPassword($user, 'azerty');
         $user->setPassword($hashedPassword);
+        $user->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
+
+        $this->entityManager->persist($user);
+
+        // Créer un utilisateur
+        $user = new User();
+        $user->setEmail('lenny.lecable@gmail.com');
+        $user->setNom('Lecable');
+        $user->setPrenom('Lenny');
+        $hashedPassword = $this->passwordHasher->hashPassword($user, 'qwerty');
+        $user->setPassword($hashedPassword);
         $user->setRoles(['ROLE_USER']);
 
         $this->entityManager->persist($user);
+
         $this->entityManager->flush();
 
-        $output->writeln('Utilisateur créé avec succès !');
+        $output->writeln('Utilisateurs (admin et user) créés avec succès !');
         return Command::SUCCESS;
     }
 }
