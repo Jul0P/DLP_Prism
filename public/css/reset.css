@@ -1,0 +1,46 @@
+/* reset.css ajusté */
+
+/* Réinitialisation générale */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Toujours utile pour inclure padding et border dans les tailles */
+}
+
+/* Réinitialisation des titres */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0; /* Supprime les marges par défaut, mais laisse font-size et font-weight libres */
+}
+
+/* Réinitialisation des listes */
+ul,
+ol {
+    list-style: none;
+}
+
+/* Réinitialisation des médias */
+img,
+video,
+iframe {
+    max-width: 100%;
+    height: auto;
+    vertical-align: middle; /* Évite les petits écarts sous les images */
+}
+
+/* Réinitialisation minimale des formulaires */
+button,
+input,
+select,
+textarea {
+    font-family: inherit; /* Hérite de la police du parent */
+    font-size: inherit; /* Hérite de la taille de police */
+    line-height: inherit; /* Hérite de la hauteur de ligne */
+    margin: 0; /* Supprime les marges par défaut */
+}
