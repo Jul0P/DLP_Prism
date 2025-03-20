@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}Prism{% endblock %}</title>
-        {# <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">> #}
+        <link rel="stylesheet" href="{{ asset('css/normalize.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/reset.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ 'now'|date('U') }}"> {# TODO: Paramètre de requête pour forcer le navigateur à recharger le fichier CSS à retirer en production #}
+        <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
         {% block stylesheets %}
         {% endblock %}
     </head>
