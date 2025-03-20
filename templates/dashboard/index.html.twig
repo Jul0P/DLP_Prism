@@ -1,9 +1,11 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Prism - Tableau de bord{% endblock %}
-
 {% block body %}
-    <h2>Liste des entreprises</h2>
+    <h1>Liste des entreprises</h1>
+    <form method="get" action="{{ path('app_dashboard') }}" id="searchForm">
+        <input type="text" name="search" value="{{ search }}" placeholder="Rechercher par raison sociale" id="searchInput">
+        <button type="submit">Rechercher</button>
+    </form>
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>Seul un admin peut voir ce texte</p>
@@ -40,4 +42,21 @@
     {% else %}
         <p>Aucune entreprise trouvée</p>
     {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+            let timeout = null;
+
+            searchInput.addEventListener('input', function () {
+                clearTimeout(timeout);
+                timeout = setTimeout(function () {
+                    searchForm.submit(); // Soumet le formulaire après le délai
+                }, 1500); // TODO: faire du re-render si possible.
+            });
+        });
+    </script>
 {% endblock %}
