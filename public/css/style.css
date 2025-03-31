@@ -2,29 +2,50 @@
     :root {
         --background: hsl(0 0% 100%);
         --foreground: hsl(240 10% 3.9%);
+        --card: hsl(0 0% 100%);
+        --card-foreground: hsl(240 10% 3.9%);
+        --popover: hsl(0 0% 100%);
+        --popover-foreground: hsl(240 10% 3.9%);
         --primary: hsl(12 76% 61%);
         --primary-foreground: hsl(0 0% 98%);
         --secondary: hsl(27 87% 67%);
         --secondary-foreground: hsl(0 0% 98%);
         --tertiary: hsl(43 74% 66%);
         --tertiary-foreground: hsl(240 5.9% 10%);
+        --muted: hsl(240 4.8% 95.9%);
+        --muted-foreground: hsl(240 3.8% 46.1%);
         --accent: hsl(240 4.8% 95.9%);
         --accent-foreground: hsl(240 5.9% 10%);
+        --destructive: hsl(0 84.2% 60.2%);
+        --destructive-foreground: hsl(0 0% 98%);
         --border: hsl(240 5.9% 90%);
+        --input: hsl(240 5.9% 90%);
+        --ring: hsl(12 76% 61%);
+        --radius: 0.5rem;
     }
 
     [data-theme="dark"] {
         --background: hsl(240 10% 3.9%);
         --foreground: hsl(0 0% 98%);
+        --card: hsl(240 10% 3.9%);
+        --card-foreground: hsl(0 0% 98%);
+        --popover: hsl(240 10% 3.9%);
+        --popover-foreground: hsl(0 0% 98%);
         --primary: hsl(12 76% 61%);
         --primary-foreground: hsl(240 5.9% 10%);
         --secondary: hsl(27 87% 67%);
         --secondary-foreground: hsl(0 0% 98%);
         --tertiary: hsl(43 74% 66%);
         --tertiary-foreground: hsl(0 0% 98%);
+        --muted: hsl(240 3.7% 15.9%);
+        --muted-foreground: hsl(240 5% 64.9%);
         --accent: hsl(240 3.7% 15.9%);
         --accent-foreground: hsl(0 0% 98%);
+        --destructive: hsl(0 84.2% 60.2%);
+        --destructive-foreground: hsl(0 0% 98%);
         --border: hsl(240 3.7% 15.9%);
+        --input: hsl(240 3.7% 15.9%);
+        --ring: hsl(12 76% 61%);
     }
 }
 
@@ -32,6 +53,7 @@
     body {
         background-color: var(--background);
         color: var(--foreground);
+        font-family: Arial, sans-serif;
         transition: background-color 0.5s ease, color 0.5s ease;
     }
 }
