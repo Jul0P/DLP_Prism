@@ -2,31 +2,154 @@
 
 {% block title %}Prism - Connexion{% endblock %}
 
+{% block stylesheets %}
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background-color: var(--card);
+            color: var(--card-foreground);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .login-card h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--foreground);
+            text-align: left;
+        }
+
+        .login-logo img {
+            width: 200px;
+            height: auto;
+            margin-bottom: 1.5rem;
+            background-color: var(--background);
+        }
+
+        .login-header p {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .login-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-title img {
+            width: 24px;
+            height: 24px;
+        }
+
+        [data-theme="dark"] .login-title img {
+            filter: invert(1);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--input);
+            border-radius: var(--radius);
+            background-color: var(--background);
+            color: var(--foreground);
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 1px var(--ring);
+        }
+
+        .form-group input::placeholder {
+            color: var(--muted-foreground);
+        }
+
+        .form-message {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            color: var(--destructive);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: hsl(12 76% 51%);
+        }
+    </style>
+{% endblock %}
+
 {% block header %}{% endblock %}
 
 {% block body %}
-    <h1>Connexion</h1>
-
-    {% if error %}
-        {# Affichage du message d'erreur #}
-        {# TODO: améliorer l'affichage des erreurs #}
-        <div class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
-
-    <form method="post" action="{{ path('app_login') }}">
-        <div>
-            <label for="username">Email</label>
-            {# TODO: vérifier l'intérêt de la valeur par défaut #}
-            <input type="email" name="_username" id="username" value="{{ last_username ?? '' }}" required>
+    <div class="login-card">
+        <div class="login-logo">
+            <img src={{ asset('assets/icons/logo.png') }} alt="Prism Logo">
         </div>
-        <div>
-            <label for="password">Mot de passe</label>
-            <input type="password" name="_password" id="password" required>
+        <div class="login-header">
+            <div class="login-title">
+                <img src={{ asset('assets/icons/login.png') }} alt="Cadenas Icon">
+                <h1>Se connecter</h1>
+            </div>
+            <p>L'accès à Prism est réservé. Merci de vous identifier pour accéder au service.</p>
         </div>
-        {# Ajout du champ caché pour le jeton CSRF #}
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}"> 
-        <button type="submit">Se connecter</button>
-    </form>
+        <form method="post" action="{{ path('app_login') }}">
+            <div class="form-group">
+                <label for="username">Email</label>
+                <input type="email" name="_username" id="username" value="{{ last_username ?? '' }}" placeholder="exemple@gmail.com" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" name="_password" id="password" placeholder="Mot de passe" required>
+                {% if error %}
+                    <p class="form-message">
+                        L'émail ou le mot de passe est incorrect.
+                    </p>
+                {% endif %}
+            </div>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            <button type="submit">Connexion</button>
+        </form>
+    </div>
 {% endblock %}
 
 {% block footer %}{% endblock %}
