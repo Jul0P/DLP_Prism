@@ -54,10 +54,12 @@
         .login-title img {
             width: 24px;
             height: 24px;
+            transition: filter 0.5s ease;
         }
 
         [data-theme="dark"] .login-title img {
             filter: invert(1);
+            transition: filter 0.5s ease;
         }
 
         .form-group {
@@ -80,7 +82,6 @@
             background-color: var(--background);
             color: var(--foreground);
             font-size: 1rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .form-group input:focus {
@@ -109,11 +110,63 @@
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s ease;
         }
 
         button:hover {
             background-color: hsl(12 76% 51%);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .theme-toggle img {
+            width: 1.3rem;
+            height: 1.3rem;
+            color: var(--foreground);
+        }
+
+        .theme-toggle .sun-icon {
+            position: absolute;
+            transform: rotate(90deg) scale(0);
+            opacity: 0;
+            filter: brightness(0) invert(1);
+        }
+
+        .theme-toggle .moon-icon {
+            min-width: 1.3rem;
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .theme-toggle .sun-icon {
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .theme-toggle .moon-icon {
+            transform: rotate(-90deg) scale(0);
+            opacity: 0;
+        }
+
+        .login-card, .form-group input, label, button, h1 {
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
         }
     </style>
 {% endblock %}
@@ -121,13 +174,17 @@
 {% block header %}{% endblock %}
 
 {% block body %}
+    <button class="theme-toggle" id="theme-toggle">
+        <img src="{{ asset('assets/icons/sun.svg') }}" alt="Sun Icon" class="sun-icon">
+        <img src="{{ asset('assets/icons/moon.svg') }}" alt="Moon Icon" class="moon-icon">
+    </button>
     <div class="login-card">
         <div class="login-logo">
             <img src={{ asset('assets/icons/logo.png') }} alt="Prism Logo">
         </div>
         <div class="login-header">
             <div class="login-title">
-                <img src={{ asset('assets/icons/login.png') }} alt="Cadenas Icon">
+                <img src={{ asset('assets/icons/cadenas-verrouille.png') }} alt="Cadenas Icon">
                 <h1>Se connecter</h1>
             </div>
             <p>L'accès à Prism est réservé. Merci de vous identifier pour accéder au service.</p>
@@ -153,3 +210,25 @@
 {% endblock %}
 
 {% block footer %}{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleButton = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+
+            if (localStorage.getItem('theme') === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+            }
+
+            toggleButton.addEventListener('click', () => {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+        });
+    </script>
+{% endblock %}
