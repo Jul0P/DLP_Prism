@@ -1,5 +1,120 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+    <style>
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background-color: var(--background);
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            width: 200px;
+            height: auto;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--foreground);
+            margin: 0;
+        }
+
+        .button-container {
+            width: 200px;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: right;
+        }
+
+        button {
+            padding: 0.75rem;
+            background-color: var(--primary);
+            color: white;
+            border: var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: hsl(12 76% 51%);
+        }
+
+        .theme-toggle {
+            width: 2.8rem;
+            height: 2.8rem;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .theme-toggle img {
+            width: 1.3rem;
+            height: 1.3rem;
+            color: var(--foreground);
+        }
+
+        .theme-toggle .sun-icon {
+            position: absolute;
+            transform: rotate(90deg) scale(0);
+            opacity: 0;
+            filter: brightness(0) invert(1);
+        }
+
+        .theme-toggle .moon-icon {
+            min-width: 1.3rem;
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .theme-toggle .sun-icon {
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .theme-toggle .moon-icon {
+            transform: rotate(-90deg) scale(0);
+            opacity: 0;
+        }
+
+        h1 {
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+    </style>
+{% endblock %}
+
+{% block title %}Prism - Tableau de bord{% endblock %}
+
+{% block header %}
+    <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="logo">
+    <h1>Tableau de bord</h1>
+    <div class="button-container">
+        <button class="theme-toggle" id="theme-toggle">
+            <img src="{{ asset('assets/icons/sun.svg') }}" alt="Sun Icon" class="sun-icon">
+            <img src="{{ asset('assets/icons/moon.svg') }}" alt="Moon Icon" class="moon-icon">
+        </button>
+    </div>
+{% endblock %}
+
 {% block body %}
     <h1>Liste des entreprises</h1>
     <form method="get" action="{{ path('app_dashboard') }}" id="searchForm">
@@ -56,6 +171,24 @@
                 timeout = setTimeout(function () {
                     searchForm.submit(); // Soumet le formulaire après le délai
                 }, 1500); // TODO: faire du re-render si possible.
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleButton = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+
+            if (localStorage.getItem('theme') === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+            }
+
+            toggleButton.addEventListener('click', () => {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
             });
         });
     </script>
