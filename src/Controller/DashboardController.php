@@ -14,6 +14,8 @@ class DashboardController extends AbstractController
     {
         // Récupérer le terme de recherche depuis la requête
         $search = $request->query->get('search', '');
+        $filters = $request->query->all('filters');
+        $filters = array_filter($filters, 'is_scalar');
 
         $options = [
             ['value' => 'Rouen', 'label' => 'Rouen'],
@@ -29,13 +31,23 @@ class DashboardController extends AbstractController
             'Dreux Cedex' => 1,
         ];
 
+        $queryBuilder = $entrepriseRepository->createQueryBuilder('e');
+
         // Si un terme de recherche est fourni, rechercher les entreprises correspondantes
         // Sinon, récupérer toutes les entreprises
         $entreprises = $search ? $entrepriseRepository->findByRaisonSociale($search) : $entrepriseRepository->findAll();
 
+        if (!empty($filters)) {
+            $queryBuilder->andWhere('e.ville IN (:filters)')
+                         ->setParameter('filters', $filters);
+        }
+
+        $entreprises = $queryBuilder->getQuery()->getResult();
+
         // Rendre le template avec les entreprises trouvées et le terme de recherche
         return $this->render('dashboard/index.html.twig', [
             'entreprises' => $entreprises,
+            'selectedValues' => $filters,
             'search' => $search,
             'options' => $options,
             'facets' => $facets,
