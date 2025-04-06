@@ -525,10 +525,6 @@
         </div>
     </div>
 
-    {% if is_granted('ROLE_ADMIN') %}
-        <p>Seul un admin peut voir ce texte</p>
-    {% endif %}
-
     {# Vérifie si le tableau des entreprises contient au moins une entrée avant d'afficher le tableau #}
     {% if entreprises|length > 0 %} 
         <table border="1">
@@ -559,6 +555,10 @@
         </table>
     {% else %}
         <p>Aucune entreprise trouvée</p>
+    {% endif %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <p>Seul un admin peut voir ce texte</p>
     {% endif %}
 {% endblock %}
 
