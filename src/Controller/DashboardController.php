@@ -37,12 +37,12 @@ class DashboardController extends AbstractController
         // Sinon, récupérer toutes les entreprises
         $entreprises = $search ? $entrepriseRepository->findByRaisonSociale($search) : $entrepriseRepository->findAll();
 
-        if (!empty($filters)) {
-            $queryBuilder->andWhere('e.ville IN (:filters)')
-                         ->setParameter('filters', $filters);
-        }
+        // if (!empty($filters)) {
+        //     $queryBuilder->andWhere('e.ville IN (:filters)')
+        //                  ->setParameter('filters', $filters);
+        // }
 
-        $entreprises = $queryBuilder->getQuery()->getResult();
+        // $entreprises = $queryBuilder->getQuery()->getResult();
 
         // Rendre le template avec les entreprises trouvées et le terme de recherche
         return $this->render('dashboard/index.html.twig', [
