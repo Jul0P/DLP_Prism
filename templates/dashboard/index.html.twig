@@ -458,6 +458,36 @@
         [data-theme="dark"] .icon {
             filter: brightness(0) invert(1); /* Inverse les couleurs pour le thème sombre */
         }
+
+        .search-input {
+            display: flex;
+            width: 100%;
+            max-width: 250px;
+            height: 2rem;
+            border: 1px solid var(--input);
+            border-radius: var(--radius);
+            background-color: var(--background);
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            color: var(--foreground);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input::placeholder {
+            color: var(--muted-foreground);
+        }
+
+        .search-input:focus-visible {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 1px var(--ring);
+        }
+
+        .search-input:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
     </style>
 {% endblock %}
 
@@ -478,7 +508,7 @@
     <h1>Liste des entreprises</h1>
     <div class="toolbar-container">
         <form method="get" action="{{ path('app_dashboard') }}" id="searchForm">
-            <input type="text" name="search" value="{{ search }}" placeholder="Rechercher par raison sociale" id="searchInput">
+            <input type="text" name="search" value="{{ search }}" placeholder="Rechercher par raison sociale" id="searchInput" class="search-input">
         </form>
 
         <div class="filter-container" id="filter-container">
