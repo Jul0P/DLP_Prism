@@ -31,20 +31,8 @@ class DashboardController extends AbstractController
             'Dreux Cedex' => 1,
         ];
 
-        $queryBuilder = $entrepriseRepository->createQueryBuilder('e');
+        $entreprises = $entrepriseRepository->findBySearchAndFilters($search, $filters);
 
-        // Si un terme de recherche est fourni, rechercher les entreprises correspondantes
-        // Sinon, récupérer toutes les entreprises
-        $entreprises = $search ? $entrepriseRepository->findByRaisonSociale($search) : $entrepriseRepository->findAll();
-
-        // if (!empty($filters)) {
-        //     $queryBuilder->andWhere('e.ville IN (:filters)')
-        //                  ->setParameter('filters', $filters);
-        // }
-
-        // $entreprises = $queryBuilder->getQuery()->getResult();
-
-        // Rendre le template avec les entreprises trouvées et le terme de recherche
         return $this->render('dashboard/index.html.twig', [
             'entreprises' => $entreprises,
             'selectedValues' => $filters,
