@@ -20,6 +20,19 @@
             height: auto;
         }
 
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: -0.02em;
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--muted-foreground);
+        }
+
         h1 {
             font-size: 1.5rem;
             font-weight: 600;
@@ -505,7 +518,8 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Liste des entreprises</h1>
+    <h1 class="title">Liste des entreprises</h1>
+    <p class="subtitle">Voici une liste des entreprises prenant des stagiaires de la section informatique de la Châtaigneraie</p>
     <div class="toolbar-container">
         <form method="get" action="{{ path('app_dashboard') }}" id="searchForm">
             <input type="text" name="search" value="{{ search }}" placeholder="Rechercher par raison sociale" id="searchInput" class="search-input">
