@@ -4,6 +4,9 @@
     <style>
         main {
             padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
         }
 
         header {
@@ -522,95 +525,99 @@
 {% endblock %}
 
 {% block main %}
-    <h1 class="title">Liste des entreprises</h1>
-    <p class="subtitle">Voici une liste des entreprises prenant des stagiaires de la section informatique de la Châtaigneraie</p>
-    <div class="toolbar-container">
-        <form method="get" action="{{ path('app_dashboard') }}" id="searchForm">
-            <input type="text" name="search" value="{{ search }}" placeholder="Rechercher par raison sociale" id="searchInput" class="search-input">
-        </form>
+    <div class="table-header">
+        <h1 class="title">Liste des entreprises</h1>
+        <p class="subtitle">Voici une liste des entreprises prenant des stagiaires de la section informatique de la Châtaigneraie</p>
+    </div>
+    <div class="table-container">
+        <div class="toolbar-container">
+            <form method="get" action="{{ path('app_dashboard') }}" id="searchForm">
+                <input type="text" name="search" value="{{ search }}" placeholder="Rechercher par raison sociale" id="searchInput" class="search-input">
+            </form>
 
-        <div class="filter-container" id="filter-container">
-            <!-- Bouton déclencheur -->
-            <button class="filter-button" data-popover-target="popover-content-1" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="popover-content-1" data-state="closed">
-                <img src="{{ asset('assets/icons/circle-plus.svg') }}" alt="Circle Plus Icon" class="icon"> {{ title }}
-                {% if selectedValues|length > 0 %}
-                    <span class="separator"></span>
-                    <span class="badge mobile-only">{{ selectedValues|length }}</span>
-                    <div class="desktop-badges">
-                        {% if selectedValues|length > 2 %}
-                            <span class="badge">{{ selectedValues|length }} sélectionnés</span>
-                        {% else %}
-                            {% for option in options|filter(option => option.value in selectedValues) %}
-                                <span class="badge">{{ option.label }}</span>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-                {% endif %}
-            </button>
-            <!-- Contenu du popover -->
-            <div class="popover-content" id="popover-content-1" data-state="closed" role="dialog" tabindex="-1">
-                <div class="command">
-                    <div class="command-input-wrapper">
-                        <img src="{{ asset('assets/icons/search.svg') }}" alt="Search Icon" class="icon">
-                        <input type="text" placeholder="Rechercher..." class="command-input" autocomplete="off" autocorrect="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="command-list" />
-                    </div>
-                    <div class="command-list" role="listbox" aria-label="Suggestions" id="command-list">
-                        <div class="command-group" role="presentation">
-                            {% for option in options %}
-                                <div class="command-item" role="option" data-value="{{ option.value }}" data-selected="{{ option.value in selectedValues ? 'true' : 'false' }}" data-disabled="false">
-                                    <div class="checkbox {% if option.value in selectedValues %}checked{% endif %}">
-                                        <img src="{{ asset('assets/icons/check.svg') }}" alt="Check Icon" class="icon">
-                                    </div>
-                                    <span>{{ option.label }}</span>
-                                    {% if facets[option.value] is defined %}
-                                        <span class="facet-count">{{ facets[option.value] }}</span>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
+            <div class="filter-container" id="filter-container">
+                <!-- Bouton déclencheur -->
+                <button class="filter-button" data-popover-target="popover-content-1" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="popover-content-1" data-state="closed">
+                    <img src="{{ asset('assets/icons/circle-plus.svg') }}" alt="Circle Plus Icon" class="icon"> {{ title }}
+                    {% if selectedValues|length > 0 %}
+                        <span class="separator"></span>
+                        <span class="badge mobile-only">{{ selectedValues|length }}</span>
+                        <div class="desktop-badges">
+                            {% if selectedValues|length > 2 %}
+                                <span class="badge">{{ selectedValues|length }} sélectionnés</span>
+                            {% else %}
+                                {% for option in options|filter(option => option.value in selectedValues) %}
+                                    <span class="badge">{{ option.label }}</span>
+                                {% endfor %}
+                            {% endif %}
                         </div>
-                        {% if selectedValues|length > 0 %}
-                            <div class="command-separator"></div>
-                            <div class="command-group">
-                                <div class="command-item reset" role="option" data-value="reset">Réinitialiser</div>
+                    {% endif %}
+                </button>
+                <!-- Contenu du popover -->
+                <div class="popover-content" id="popover-content-1" data-state="closed" role="dialog" tabindex="-1">
+                    <div class="command">
+                        <div class="command-input-wrapper">
+                            <img src="{{ asset('assets/icons/search.svg') }}" alt="Search Icon" class="icon">
+                            <input type="text" placeholder="Rechercher..." class="command-input" autocomplete="off" autocorrect="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="command-list" />
+                        </div>
+                        <div class="command-list" role="listbox" aria-label="Suggestions" id="command-list">
+                            <div class="command-group" role="presentation">
+                                {% for option in options %}
+                                    <div class="command-item" role="option" data-value="{{ option.value }}" data-selected="{{ option.value in selectedValues ? 'true' : 'false' }}" data-disabled="false">
+                                        <div class="checkbox {% if option.value in selectedValues %}checked{% endif %}">
+                                            <img src="{{ asset('assets/icons/check.svg') }}" alt="Check Icon" class="icon">
+                                        </div>
+                                        <span>{{ option.label }}</span>
+                                        {% if facets[option.value] is defined %}
+                                            <span class="facet-count">{{ facets[option.value] }}</span>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
                             </div>
-                        {% endif %}
+                            {% if selectedValues|length > 0 %}
+                                <div class="command-separator"></div>
+                                <div class="command-group">
+                                    <div class="command-item reset" role="option" data-value="reset">Réinitialiser</div>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </div> 
 
-    {# Vérifie si le tableau des entreprises contient au moins une entrée avant d'afficher le tableau #}
-    {% if entreprises|length > 0 %} 
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Raison Sociale</th>
-                    <th>Adresse</th>
-                    <th>Code Postal</th>
-                    <th>Ville</th>
-                    <th>Téléphone</th>
-                    <th>Email</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entreprise in entreprises %}
+        {# Vérifie si le tableau des entreprises contient au moins une entrée avant d'afficher le tableau #}
+        {% if entreprises|length > 0 %} 
+            <table border="1">
+                <thead>
                     <tr>
-                        <td>{{ entreprise.id }}</td>
-                        <td>{{ entreprise.rs }}</td>
-                        <td>{{ entreprise.adresse }}</td>
-                        <td>{{ entreprise.cp }}</td>
-                        <td>{{ entreprise.ville }}</td>
-                        <td>{{ entreprise.tel }}</td>
-                        <td>{{ entreprise.mail }}</td>
+                        <th>ID</th>
+                        <th>Raison Sociale</th>
+                        <th>Adresse</th>
+                        <th>Code Postal</th>
+                        <th>Ville</th>
+                        <th>Téléphone</th>
+                        <th>Email</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>Aucune entreprise trouvée</p>
-    {% endif %}
+                </thead>
+                <tbody>
+                    {% for entreprise in entreprises %}
+                        <tr>
+                            <td>{{ entreprise.id }}</td>
+                            <td>{{ entreprise.rs }}</td>
+                            <td>{{ entreprise.adresse }}</td>
+                            <td>{{ entreprise.cp }}</td>
+                            <td>{{ entreprise.ville }}</td>
+                            <td>{{ entreprise.tel }}</td>
+                            <td>{{ entreprise.mail }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Aucune entreprise trouvée</p>
+        {% endif %}
+    </div>
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>Seul un admin peut voir ce texte</p>
