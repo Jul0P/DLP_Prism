@@ -508,6 +508,58 @@
             cursor: not-allowed;
             opacity: 0.5;
         }
+
+        .table-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .table {
+            width: 100%;
+            text-align: left;
+            font-size: 0.875rem;
+            color: var(--foreground);
+            background-color: var(--background);
+            border-collapse: collapse;
+        }
+
+        .table thead tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table th {
+            height: 2.5rem;
+            padding: 0 0.5rem;
+            text-align: left;
+            vertical-align: middle;
+            font-weight: 500;
+            color: var(--muted-foreground);
+        }
+
+        .table tr:hover {
+            background-color: var(--muted);
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background-color 0.2s;
+        }
+
+        .table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .table td {
+            padding: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .table tr[data-state="selected"] {
+            background-color: var(--muted);
+        }
     </style>
 {% endblock %}
 
@@ -534,7 +586,6 @@
             <form method="get" action="{{ path('app_dashboard') }}" id="searchForm">
                 <input type="text" name="search" value="{{ search }}" placeholder="Rechercher par raison sociale" id="searchInput" class="search-input">
             </form>
-
             <div class="filter-container" id="filter-container">
                 <!-- Bouton déclencheur -->
                 <button class="filter-button" data-popover-target="popover-content-1" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="popover-content-1" data-state="closed">
@@ -586,37 +637,39 @@
             </div>
         </div> 
 
-        {# Vérifie si le tableau des entreprises contient au moins une entrée avant d'afficher le tableau #}
-        {% if entreprises|length > 0 %} 
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Raison Sociale</th>
-                        <th>Adresse</th>
-                        <th>Code Postal</th>
-                        <th>Ville</th>
-                        <th>Téléphone</th>
-                        <th>Email</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entreprise in entreprises %}
+        <div class="table-wrapper">
+            {# Vérifie si le tableau des entreprises contient au moins une entrée avant d'afficher le tableau #}
+            {% if entreprises|length > 0 %}
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>{{ entreprise.id }}</td>
-                            <td>{{ entreprise.rs }}</td>
-                            <td>{{ entreprise.adresse }}</td>
-                            <td>{{ entreprise.cp }}</td>
-                            <td>{{ entreprise.ville }}</td>
-                            <td>{{ entreprise.tel }}</td>
-                            <td>{{ entreprise.mail }}</td>
+                            <th scope="col">ID</th>
+                            <th scope="col">Raison Sociale</th>
+                            <th scope="col">Adresse</th>
+                            <th scope="col">Code Postal</th>
+                            <th scope="col">Ville</th>
+                            <th scope="col">Téléphone</th>
+                            <th scope="col">Email</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>Aucune entreprise trouvée</p>
-        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for entreprise in entreprises %}
+                            <tr>
+                                <td>{{ entreprise.id }}</td>
+                                <td>{{ entreprise.rs }}</td>
+                                <td>{{ entreprise.adresse }}</td>
+                                <td>{{ entreprise.cp }}</td>
+                                <td>{{ entreprise.ville }}</td>
+                                <td>{{ entreprise.tel }}</td>
+                                <td>{{ entreprise.mail }}</td>                   
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Aucune entreprise trouvée</p>
+            {% endif %}
+        </div>
     </div>
 
     {% if is_granted('ROLE_ADMIN') %}
