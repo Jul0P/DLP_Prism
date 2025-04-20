@@ -540,7 +540,7 @@
         }
 
         .table tr:hover {
-            background-color: var(--muted);
+            background-color: hsla(240, 3.7%, 15.9%, 0.5);
         }
 
         .table tbody tr {
@@ -558,6 +558,49 @@
         }
 
         .table tr[data-state="selected"] {
+            background-color: var(--muted);
+        }                               
+
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            height: 2rem;
+            width: 2rem;
+            padding: 0;
+            background-color: transparent;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--foreground);
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background-color: var(--accent);
+            color: var(--accent-foreground);
+        }
+
+        .action-button:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--ring);
+        }
+
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-button .icon {
+            width: 1rem;
+            height: 1rem;
+            pointer-events: none;
+        }
+
+        .action-button[data-state="open"] {
             background-color: var(--muted);
         }
     </style>
@@ -650,6 +693,7 @@
                             <th scope="col">Ville</th>
                             <th scope="col">Téléphone</th>
                             <th scope="col">Email</th>
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -661,7 +705,15 @@
                                 <td>{{ entreprise.cp }}</td>
                                 <td>{{ entreprise.ville }}</td>
                                 <td>{{ entreprise.tel }}</td>
-                                <td>{{ entreprise.mail }}</td>                   
+                                <td>{{ entreprise.mail }}</td>
+                                <td>
+                                    <button class="action-button">
+                                        <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
+                                    </button>
+                                    <button class="action-button">
+                                        <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
+                                    </button>
+                                </td>                     
                             </tr>
                         {% endfor %}
                     </tbody>
