@@ -515,6 +515,7 @@
             overflow: auto;
             border: 1px solid var(--border);
             border-radius: var(--radius);
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
         }
 
         .table {
@@ -524,10 +525,12 @@
             color: var(--foreground);
             background-color: var(--background);
             border-collapse: collapse;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
         }
 
         .table thead tr {
             border-bottom: 1px solid var(--border);
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
         }
 
         .table th {
@@ -545,7 +548,7 @@
 
         .table tbody tr {
             border-bottom: 1px solid var(--border);
-            transition: background-color 0.2s;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
         }
 
         .table tbody tr:last-child {
