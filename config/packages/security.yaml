@@ -29,5 +29,6 @@ security:
                 target: app_login
 
     access_control:
+        - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
