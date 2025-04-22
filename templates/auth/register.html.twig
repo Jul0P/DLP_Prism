@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Prism - Inscription{% endblock %}
+
+{% block header %}{% endblock %}
+
+{% block main %}
+    <div>
+        <div>
+            <img src={{ asset('assets/icons/logo.png') }} alt="Prism Logo">
+        </div>
+        <div>
+            <div>
+                <img src={{ asset('assets/icons/cadenas-verrouille.png') }} alt="Cadenas Icon">
+                <h1>Inscription</h1>
+            </div>
+            <p>Créez un compte pour accéder à toutes les fonctionnalités de Prism.</p>
+        </div>
+        <form method="post" action="{{ path('app_register') }}">
+            <div>
+                <label for="nom">Nom</label>
+                <input type="text" name="nom" id="nom" placeholder="Votre nom" required>
+            </div>
+            <div>
+                <label for="prenom">Prénom</label>
+                <input type="text" name="prenom" id="prenom" placeholder="Votre prénom" required>
+            </div>
+            <div>
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" placeholder="exemple@gmail.com" required>
+            </div>
+            <div>
+                <label for="password">Mot de passe</label>
+                <input type="password" name="password" id="password" placeholder="Mot de passe" required>
+                {% if error %}
+                    <p class="form-message">{{ error }}</p>
+                {% endif %}
+            </div>
+            <button type="submit">S'inscrire</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block footer %}{% endblock %}
