@@ -2,34 +2,169 @@
 
 {% block title %}Prism - Inscription{% endblock %}
 
+{% block stylesheets %}
+    <style>
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .auth-card {
+            background-color: var(--card);
+            color: var(--card-foreground);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .auth-card h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--foreground);
+            text-align: left;
+        }
+
+        .auth-logo img {
+            width: 200px;
+            height: auto;
+            margin-bottom: 1.5rem;
+            background-color: var(--background);
+        }
+
+        .auth-header p {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .auth-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-title img {
+            width: 24px;
+            height: 24px;
+            transition: filter 0.5s ease;
+        }
+
+        [data-theme="dark"] .auth-title img {
+            filter: invert(1);
+            transition: filter 0.5s ease;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--input);
+            border-radius: var(--radius);
+            background-color: var(--background);
+            color: var(--foreground);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--ring);
+            box-shadow: 0 0 0 1px var(--ring);
+        }
+
+        .form-group input::placeholder {
+            color: var(--muted-foreground);
+        }
+
+        .form-message {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            color: var(--destructive);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: hsl(12 76% 51%);
+        }
+
+        .auth-card, .form-group input, label, button, h1, a {
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .flex {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+    </style>
+{% endblock %}
+
 {% block header %}{% endblock %}
 
 {% block main %}
-    <div>
-        <div>
+    <div class="auth-card">
+        <div class="auth-logo">
             <img src={{ asset('assets/icons/logo.png') }} alt="Prism Logo">
         </div>
-        <div>
-            <div>
+        <div class="auth-header">
+            <div class="auth-title">
                 <img src={{ asset('assets/icons/cadenas-verrouille.png') }} alt="Cadenas Icon">
                 <h1>Inscription</h1>
             </div>
             <p>Créez un compte pour accéder à toutes les fonctionnalités de Prism.</p>
         </div>
         <form method="post" action="{{ path('app_register') }}">
-            <div>
-                <label for="nom">Nom</label>
-                <input type="text" name="nom" id="nom" placeholder="Votre nom" required>
+            <div class="flex items-center justify-between">
+                <div class="form-group">
+                    <label for="nom">Nom</label>
+                    <input type="text" name="nom" id="nom" placeholder="Votre nom" required>
+                </div>
+                <div class="form-group">
+                    <label for="prenom">Prénom</label>
+                    <input type="text" name="prenom" id="prenom" placeholder="Votre prénom" required>
+                </div>
             </div>
-            <div>
-                <label for="prenom">Prénom</label>
-                <input type="text" name="prenom" id="prenom" placeholder="Votre prénom" required>
-            </div>
-            <div>
+            <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" name="email" id="email" placeholder="exemple@gmail.com" required>
             </div>
-            <div>
+            <div class="form-group">
                 <label for="password">Mot de passe</label>
                 <input type="password" name="password" id="password" placeholder="Mot de passe" required>
                 {% if error %}
