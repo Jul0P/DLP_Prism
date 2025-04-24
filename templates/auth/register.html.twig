@@ -116,6 +116,55 @@
             background-color: hsl(12 76% 51%);
         }
 
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 2.8rem;
+            height: 2.8rem;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .theme-toggle img {
+            width: 1.3rem;
+            height: 1.3rem;
+            color: var(--foreground);
+        }
+
+        .theme-toggle .sun-icon {
+            position: absolute;
+            transform: rotate(90deg) scale(0);
+            opacity: 0;
+            filter: brightness(0) invert(1);
+        }
+
+        .theme-toggle .moon-icon {
+            min-width: 1.3rem;
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .theme-toggle .sun-icon {
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .theme-toggle .moon-icon {
+            transform: rotate(-90deg) scale(0);
+            opacity: 0;
+        }
+
         .auth-card, .form-group input, label, button, h1, a {
             transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
         }
@@ -138,6 +187,10 @@
 {% block header %}{% endblock %}
 
 {% block main %}
+    <button class="theme-toggle" id="theme-toggle">
+        <img src="{{ asset('assets/icons/sun.svg') }}" alt="Sun Icon" class="sun-icon">
+        <img src="{{ asset('assets/icons/moon.svg') }}" alt="Moon Icon" class="moon-icon">
+    </button>
     <div class="auth-card">
         <div class="auth-logo">
             <img src={{ asset('assets/icons/logo.png') }} alt="Prism Logo">
@@ -177,3 +230,25 @@
 {% endblock %}
 
 {% block footer %}{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleButton = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+
+            if (localStorage.getItem('theme') === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+            }
+
+            toggleButton.addEventListener('click', () => {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+        });
+    </script>
+{% endblock %}
