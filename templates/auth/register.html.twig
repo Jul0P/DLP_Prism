@@ -181,6 +181,19 @@
         .justify-between {
             justify-content: space-between;
         }
+
+        .w-30 {
+            width: 30%;
+        }
+
+        .w-55 {
+            width: 55%;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--foreground);
+        }
     </style>
 {% endblock %}
 
@@ -224,7 +237,10 @@
                     <p class="form-message">{{ error }}</p>
                 {% endif %}
             </div>
-            <button type="submit">S'inscrire</button>
+            <div class="flex items-center justify-between">
+                <button class="w-30" type="submit">S'inscrire</button>
+                <a class="w-55" href="{{ path('app_login') }}">Vous avez déjà un compte ?</a>
+            </div>
         </form>
     </div>
 {% endblock %}
