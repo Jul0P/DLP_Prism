@@ -165,8 +165,34 @@
             opacity: 0;
         }
 
-        .auth-card, .form-group input, label, button, h1 {
+        .auth-card, .form-group input, label, button, h1, a {
             transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+         .flex {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .w-30 {
+            width: 30%;
+        }
+
+        .w-55 {
+            width: 55%;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--foreground);
         }
     </style>
 {% endblock %}
@@ -204,7 +230,10 @@
                 {% endif %}
             </div>
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-            <button type="submit">Connexion</button>
+            <div class="flex items-center justify-between">
+                <button class="w-30" type="submit">Connexion</button>
+                <a class="w-55" href="{{ path('app_register') }}">Vous n'avez pas de compte ?</a>
+            </div>
         </form>
     </div>
 {% endblock %}
