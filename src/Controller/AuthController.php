@@ -34,9 +34,35 @@ class AuthController extends AbstractController
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register()
+    public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $error = null;
+
+        if ($request->isMethod('POST')) {
+            $email = $request->request->get('email');
+            $password = $request->request->get('password');
+            $nom = $request->request->get('nom');
+            $prenom = $request->request->get('prenom');
+
+            $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+            if ($existingUser) {
+                $error = 'Cet email est déjà utilisé.';
+            } else {
+                $user = new User();
+                $user->setEmail($email);
+                $user->setNom($nom);
+                $user->setPrenom($prenom);
+                $hashedPassword = $passwordHasher->hashPassword($user, $password);
+                $user->setPassword($hashedPassword);
+                $user->setRoles(['ROLE_USER']);
+
+                $entityManager->persist($user);
+
+                $entityManager->flush();
+
+                return $this->redirectToRoute('app_login');
+            }
+        }
 
         return $this->render('auth/register.html.twig', [
             'error' => $error,
