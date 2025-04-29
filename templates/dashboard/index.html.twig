@@ -25,6 +25,7 @@
         .logo {
             width: 200px;
             height: auto;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, opacity 0.5s ease, filter 0.5s ease;
         }
 
         .title {
@@ -53,6 +54,7 @@
             display: flex;
             align-items: center;
             justify-content: right;
+            gap: 0.75rem;
         }
 
         button {
@@ -80,6 +82,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
         }
 
         .theme-toggle:hover {
@@ -619,6 +622,10 @@
             <img src="{{ asset('assets/icons/sun.svg') }}" alt="Sun Icon" class="sun-icon">
             <img src="{{ asset('assets/icons/moon.svg') }}" alt="Moon Icon" class="moon-icon">
         </button>
+        <button class="theme-toggle" id="logout-button" type="submit" form="logout-form">
+            <img src="{{ asset('assets/icons/log-out.svg') }}" alt="Log Out Icon" class="icon">
+        </button>
+        <form id="logout-form" method="post" action="{{ path('app_logout') }}" style="display: none;"></form>
     </div>
 {% endblock %}
 
