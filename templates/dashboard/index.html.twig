@@ -703,7 +703,9 @@
                             <th scope="col">Ville</th>
                             <th scope="col">Téléphone</th>
                             <th scope="col">Email</th>
-                            <th scope="col">Actions</th>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <th scope="col">Actions</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -716,14 +718,16 @@
                                 <td>{{ entreprise.ville }}</td>
                                 <td>{{ entreprise.tel }}</td>
                                 <td>{{ entreprise.mail }}</td>
-                                <td>
-                                    <button class="action-button">
-                                        <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
-                                    </button>
-                                    <button class="action-button">
-                                        <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
-                                    </button>
-                                </td>                     
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <td>
+                                        <button class="action-button">
+                                            <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
+                                        </button>
+                                        <button class="action-button">
+                                            <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
+                                        </button>
+                                    </td>    
+                                {% endif %}                 
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -733,10 +737,6 @@
             {% endif %}
         </div>
     </div>
-
-    {% if is_granted('ROLE_ADMIN') %}
-        <p>Seul un admin peut voir ce texte</p>
-    {% endif %}
 {% endblock %}
 
 {% block javascripts %}
