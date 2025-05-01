@@ -546,7 +546,7 @@
         }
 
         .table tr:hover {
-            background-color: hsla(240, 3.7%, 15.9%, 0.5);
+            background-color: var(--muted);
         }
 
         .table tbody tr {
@@ -586,8 +586,7 @@
         }
 
         .action-button:hover {
-            background-color: var(--accent);
-            color: var(--accent-foreground);
+            background-color: var(--muted-foreground);
         }
 
         .action-button:focus-visible {
@@ -607,7 +606,7 @@
         }
 
         .action-button[data-state="open"] {
-            background-color: var(--muted);
+            background-color: var(--muted-foreground);
         }
     </style>
 {% endblock %}
@@ -720,6 +719,9 @@
                                 <td>{{ entreprise.mail }}</td>
                                 {% if is_granted('ROLE_ADMIN') %}
                                     <td>
+                                        <button class="action-button">
+                                            <img src="{{ asset('assets/icons/eye.svg') }}" alt="Delete Icon" class="icon">
+                                        </button>
                                         <button class="action-button">
                                             <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
                                         </button>
