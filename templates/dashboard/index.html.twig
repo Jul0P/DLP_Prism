@@ -72,53 +72,6 @@
             background-color: hsl(12 76% 51%);
         }
 
-        .theme-toggle {
-            width: 2.8rem;
-            height: 2.8rem;
-            background-color: var(--background);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .theme-toggle:hover {
-            background-color: var(--accent);
-            border-color: var(--accent);
-        }
-
-        .theme-toggle img {
-            width: 1.3rem;
-            height: 1.3rem;
-            color: var(--foreground);
-        }
-
-        .theme-toggle .sun-icon {
-            position: absolute;
-            transform: rotate(90deg) scale(0);
-            opacity: 0;
-            filter: brightness(0) invert(1);
-        }
-
-        .theme-toggle .moon-icon {
-            min-width: 1.3rem;
-            transform: rotate(0deg) scale(1);
-            opacity: 1;
-        }
-
-        [data-theme="dark"] .theme-toggle .sun-icon {
-            transform: rotate(0deg) scale(1);
-            opacity: 1;
-        }
-
-        [data-theme="dark"] .theme-toggle .moon-icon {
-            transform: rotate(-90deg) scale(0);
-            opacity: 0;
-        }
-
         h1, img {
             transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
         }
@@ -581,7 +534,7 @@
             font-size: 0.875rem;
             font-weight: 500;
             color: var(--foreground);
-            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
             cursor: pointer;
         }
 
@@ -608,6 +561,172 @@
         .action-button[data-state="open"] {
             background-color: var(--muted-foreground);
         }
+
+        .dropdown-menu-trigger {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+            width: auto;
+            white-space: nowrap;
+        }
+
+        .dropdown-menu-trigger:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .dropdown-menu-trigger:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--ring);
+        }
+
+        .dropdown-menu-trigger img {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dropdown-menu-trigger .user-info {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            color: var(--foreground);
+        }
+
+        .dropdown-menu-trigger .user-info .username {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .dropdown-menu-trigger .user-info .role {
+            font-size: 0.75rem;
+            color: var(--muted-foreground);
+            font-weight: 400;
+        }
+
+        .dropdown-menu-content {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 2rem;
+            width: auto;
+            background-color: var(--popover);
+            color: var(--popover-foreground);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+            animation-duration: 0.2s;
+            animation-fill-mode: forwards;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .dropdown-menu-content[data-state="open"] {
+            display: block;
+            animation-name: fade-in, zoom-in;
+        }
+
+        .dropdown-menu-content[data-state="closed"] {
+            animation-name: fade-out, zoom-out;
+        }
+
+        .dropdown-menu-label {
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .dropdown-menu-label img {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+        }
+
+        .dropdown-menu-label .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dropdown-menu-label .username {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .dropdown-menu-label .email {
+            font-size: 0.75rem;
+            color: var(--muted-foreground);
+        }
+
+        .dropdown-menu-separator {
+            height: 1px;
+            background-color: var(--border);
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .dropdown-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            margin: 0.25rem;
+            font-size: 0.875rem;
+            color: var(--foreground);
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .dropdown-menu-item:hover {
+            background-color: var(--accent);
+            color: var(--accent-foreground);
+        }
+
+        .dropdown-menu-item img {
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+        }
+
+        .dropdown-menu-item.theme-toggle .sun-icon {
+            position: absolute;
+            transform: rotate(90deg) scale(0);
+            opacity: 0;
+            filter: brightness(0) invert(1);
+        }
+
+        .dropdown-menu-item.theme-toggle .moon-icon {
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .dropdown-menu-item.theme-toggle .sun-icon {
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .dropdown-menu-item.theme-toggle .moon-icon {
+            transform: rotate(-90deg) scale(0);
+            opacity: 0;
+        }
+
+        .dropdown-menu-trigger .chevron {
+            width: 1rem;
+            height: 1rem;
+            margin-left: auto;
+            transition: transform 0.2s ease;
+        }
+
+        .dropdown-menu-trigger[aria-expanded="true"] .chevron {
+            transform: rotate(180deg);
+        }
     </style>
 {% endblock %}
 
@@ -617,13 +736,39 @@
     <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="logo">
     <h1>Tableau de bord</h1>
     <div class="button-container">
-        <button class="theme-toggle" id="theme-toggle">
-            <img src="{{ asset('assets/icons/sun.svg') }}" alt="Sun Icon" class="sun-icon">
-            <img src="{{ asset('assets/icons/moon.svg') }}" alt="Moon Icon" class="moon-icon">
+        <button class="dropdown-menu-trigger" data-popover-target="dropdown-menu-content" aria-haspopup="dialog" aria-expanded="false" aria-controls="dropdown-menu-content" data-state="closed">
+            <img src="{{ asset('assets/icons/circle-user-round.svg') }}" alt="User Icon" class="icon">
+            <div class="user-info">
+                <span class="username">{{ app.user.prenom }} {{ app.user.nom }}</span>
+                <span class="role">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        Administrateur
+                    {% elseif is_granted('ROLE_USER') %}
+                        Enseignant
+                    {% endif %}
+                </span>
+            </div>
+            <img src="{{ asset('assets/icons/chevrons-up-down.svg') }}" alt="Chevron Icon" class="chevron icon">
         </button>
-        <button class="theme-toggle" id="logout-button" type="submit" form="logout-form">
-            <img src="{{ asset('assets/icons/log-out.svg') }}" alt="Log Out Icon" class="icon">
-        </button>
+        <div class="dropdown-menu-content" id="dropdown-menu-content" data-state="closed" role="dialog" tabindex="-1">
+            <div class="dropdown-menu-label">
+                <img src="{{ asset('assets/icons/circle-user-round.svg') }}" alt="User Icon" class="icon">
+                <div class="user-info">
+                    <span class="username">{{ app.user.prenom }} {{ app.user.nom }}</span>
+                    <span class="email">{{ app.user.email }}</span>
+                </div>
+            </div>
+            <div class="dropdown-menu-separator"></div>
+            <div class="dropdown-menu-item theme-toggle" id="theme-toggle">
+                <img src="{{ asset('assets/icons/sun.svg') }}" alt="Sun Icon" class="sun-icon icon">
+                <img src="{{ asset('assets/icons/moon.svg') }}" alt="Moon Icon" class="moon-icon icon">
+                <span>Thème</span>
+            </div>
+            <div class="dropdown-menu-item logout-button" id="logout-button" data-form="logout-form">
+                <img src="{{ asset('assets/icons/log-out.svg') }}" alt="Log Out Icon" class="icon">
+                <span>Déconnexion</span>
+            </div>
+        </div>
         <form id="logout-form" method="post" action="{{ path('app_logout') }}" style="display: none;"></form>
     </div>
 {% endblock %}
@@ -759,17 +904,15 @@
             }
 
             // Gestion du thème
-            const toggleButton = document.getElementById('theme-toggle');
             const html = document.documentElement;
             const logo = document.querySelector('header .logo');
+            const themeToggle = document.getElementById('theme-toggle');
 
             const updateLogo = () => {
                 const currentTheme = html.getAttribute('data-theme');
-                if (currentTheme === 'dark') {
-                    logo.src = "{{ asset('assets/images/logo-dark.png') }}";
-                } else {
-                    logo.src = "{{ asset('assets/images/logo.png') }}";
-                }
+                logo.src = currentTheme === 'dark' 
+                    ? "{{ asset('assets/images/logo-dark.png') }}" 
+                    : "{{ asset('assets/images/logo.png') }}";
             };
 
             if (localStorage.getItem('theme') === 'dark') {
@@ -779,8 +922,8 @@
             }
             updateLogo();
 
-            if (toggleButton) {
-                toggleButton.addEventListener('click', () => {
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
                     const currentTheme = html.getAttribute('data-theme');
                     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                     html.setAttribute('data-theme', newTheme);
@@ -789,24 +932,55 @@
                 });
             }
 
-            // Gestion du filtre
+            // Gestion du menu déroulant
+            const dropdownTrigger = document.querySelector('.dropdown-menu-trigger');
+            const dropdownContent = document.getElementById('dropdown-menu-content');
+            const logoutButton = document.getElementById('logout-button');
+
+            if (dropdownTrigger && dropdownContent) {
+                dropdownTrigger.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const isOpen = dropdownContent.getAttribute('data-state') === 'open';
+                    dropdownContent.setAttribute('data-state', isOpen ? 'closed' : 'open');
+                    dropdownContent.style.display = isOpen ? 'none' : 'block';
+                    dropdownTrigger.setAttribute('aria-expanded', !isOpen);
+                });
+
+                // Ferme le menu lorsqu'on clique à l'extérieur
+                document.addEventListener('click', (event) => {
+                    if (!dropdownContent.contains(event.target) && !dropdownTrigger.contains(event.target)) {
+                        dropdownContent.setAttribute('data-state', 'closed');
+                        dropdownContent.style.display = 'none';
+                        dropdownTrigger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+
+            // Gestion de la déconnexion
+            if (logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    const form = document.getElementById('logout-form');
+                    if (form) {
+                        form.submit();
+                    }
+                });
+            }
+
+            // Gestion du filtre (code existant inchangé)
             const buttons = document.querySelectorAll('.filter-button[data-popover-target]');
-            let selectedValues = {{ selectedValues|json_encode|raw }}; // Initialisation depuis Twig
+            let selectedValues = {{ selectedValues|json_encode|raw }};
             selectedValues = Array.isArray(selectedValues) ? selectedValues.filter(value => typeof value === 'string' && value.trim() !== '') : [];
 
-            // Fonction pour mettre à jour les badges
             function updateBadges() {
                 const button = document.querySelector('.filter-button');
                 const separator = button.querySelector('.separator');
                 const mobileBadge = button.querySelector('.badge.mobile-only');
                 const desktopBadges = button.querySelector('.desktop-badges');
 
-                // Supprimer les badges existants
                 if (separator) separator.remove();
                 if (mobileBadge) mobileBadge.remove();
                 if (desktopBadges) desktopBadges.remove();
 
-                // Ajouter les badges si nécessaire
                 if (selectedValues.length > 0) {
                     const separator = document.createElement('span');
                     separator.className = 'separator';
@@ -838,10 +1012,8 @@
                 }
             }
 
-            // Fonction pour soumettre les filtres
             function submitFilters() {
                 const validValues = selectedValues.filter(value => typeof value === 'string' && value.trim() !== '');
-
                 const form = document.createElement('form');
                 form.method = 'GET';
                 form.action = '{{ path('app_dashboard') }}';
@@ -866,7 +1038,6 @@
                 form.submit();
             }
 
-            // Gestion du clic sur le bouton
             buttons.forEach(button => {
                 button.addEventListener('click', function (event) {
                     event.stopPropagation();
@@ -879,7 +1050,6 @@
                         popover.style.display = isOpen ? 'none' : 'block';
                         this.setAttribute('aria-expanded', !isOpen);
 
-                        // Réinitialiser la barre de recherche et afficher toutes les options
                         if (!isOpen) {
                             const commandInput = popover.querySelector('.command-input');
                             if (commandInput) {
@@ -891,28 +1061,21 @@
                 });
             });
 
-            // Gestion de la recherche dans le popover
             function filterOptions(query) {
                 const commandItems = document.querySelectorAll('.command-item:not(.reset)');
                 const lowerQuery = query.toLowerCase().trim();
 
                 commandItems.forEach(item => {
                     const label = item.querySelector('span').textContent.toLowerCase();
-                    if (lowerQuery === '' || label.includes(lowerQuery)) {
-                        item.style.display = '';
-                    } else {
-                        item.style.display = 'none';
-                    }
+                    item.style.display = (lowerQuery === '' || label.includes(lowerQuery)) ? '' : 'none';
                 });
 
-                // Toujours afficher le bouton "Réinitialiser" s'il existe
                 const resetItem = document.querySelector('.command-item.reset');
                 if (resetItem) {
                     resetItem.style.display = '';
                 }
             }
 
-            // Écouter les saisies dans la barre de recherche du popover
             const commandInput = document.querySelector('.command-input');
             if (commandInput) {
                 commandInput.addEventListener('input', function () {
@@ -920,7 +1083,6 @@
                 });
             }
 
-            // Gestion du clic sur les options
             const commandItems = document.querySelectorAll('.command-item:not(.reset)');
             commandItems.forEach(item => {
                 item.addEventListener('click', function (event) {
@@ -943,7 +1105,6 @@
                 });
             });
 
-            // Gestion du clic sur "Réinitialiser"
             const resetItems = document.querySelectorAll('.command-item.reset');
             resetItems.forEach(item => {
                 item.addEventListener('click', function (event) {
@@ -970,7 +1131,6 @@
                 });
             });
 
-            // Ferme le popover lorsqu'on clique à l'extérieur
             document.addEventListener('click', function (event) {
                 const popovers = document.querySelectorAll('.popover-content');
                 popovers.forEach(popover => {
