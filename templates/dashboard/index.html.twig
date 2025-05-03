@@ -932,31 +932,73 @@
                 });
             }
 
-            // Gestion du menu déroulant
-            const dropdownTrigger = document.querySelector('.dropdown-menu-trigger');
-            const dropdownContent = document.getElementById('dropdown-menu-content');
-            const logoutButton = document.getElementById('logout-button');
+            // Gestion des popovers (usernav et filtre)
+            const popovers = document.querySelectorAll('[data-popover-target]');
+            
+            // Réinitialisation de tous les popovers au chargement
+            popovers.forEach(popoverTrigger => {
+                const targetId = popoverTrigger.getAttribute('data-popover-target');
+                const popoverContent = document.getElementById(targetId);
+                if (popoverContent) {
+                    popoverContent.setAttribute('data-state', 'closed');
+                    popoverContent.style.display = 'none';
+                    popoverTrigger.setAttribute('aria-expanded', 'false');
+                }
+            });
 
-            if (dropdownTrigger && dropdownContent) {
-                dropdownTrigger.addEventListener('click', (event) => {
+            // Gestion du clic sur les déclencheurs de popover
+            popovers.forEach(popoverTrigger => {
+                popoverTrigger.addEventListener('click', (event) => {
                     event.stopPropagation();
-                    const isOpen = dropdownContent.getAttribute('data-state') === 'open';
-                    dropdownContent.setAttribute('data-state', isOpen ? 'closed' : 'open');
-                    dropdownContent.style.display = isOpen ? 'none' : 'block';
-                    dropdownTrigger.setAttribute('aria-expanded', !isOpen);
-                });
+                    const targetId = popoverTrigger.getAttribute('data-popover-target');
+                    const popoverContent = document.getElementById(targetId);
 
-                // Ferme le menu lorsqu'on clique à l'extérieur
-                document.addEventListener('click', (event) => {
-                    if (!dropdownContent.contains(event.target) && !dropdownTrigger.contains(event.target)) {
-                        dropdownContent.setAttribute('data-state', 'closed');
-                        dropdownContent.style.display = 'none';
-                        dropdownTrigger.setAttribute('aria-expanded', 'false');
+                    if (popoverContent) {
+                        const isOpen = popoverContent.getAttribute('data-state') === 'open';
+                        
+                        // Ferme tous les autres popovers
+                        popovers.forEach(otherTrigger => {
+                            const otherTargetId = otherTrigger.getAttribute('data-popover-target');
+                            const otherContent = document.getElementById(otherTargetId);
+                            if (otherContent && otherTargetId !== targetId) {
+                                otherContent.setAttribute('data-state', 'closed');
+                                otherContent.style.display = 'none';
+                                otherTrigger.setAttribute('aria-expanded', 'false');
+                            }
+                        });
+
+                        // Ouvre ou ferme le popover actuel
+                        popoverContent.setAttribute('data-state', isOpen ? 'closed' : 'open');
+                        popoverContent.style.display = isOpen ? 'none' : 'block';
+                        popoverTrigger.setAttribute('aria-expanded', !isOpen);
+
+                        // Pour le popover de filtre, réinitialiser la recherche
+                        if (targetId === 'popover-content-1' && !isOpen) {
+                            const commandInput = popoverContent.querySelector('.command-input');
+                            if (commandInput) {
+                                commandInput.value = '';
+                                filterOptions('');
+                            }
+                        }
                     }
                 });
-            }
+            });
+
+            // Ferme tous les popovers lorsqu'on clique à l'extérieur
+            document.addEventListener('click', (event) => {
+                popovers.forEach(popoverTrigger => {
+                    const targetId = popoverTrigger.getAttribute('data-popover-target');
+                    const popoverContent = document.getElementById(targetId);
+                    if (popoverContent && !popoverContent.contains(event.target) && !popoverTrigger.contains(event.target)) {
+                        popoverContent.setAttribute('data-state', 'closed');
+                        popoverContent.style.display = 'none';
+                        popoverTrigger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            });
 
             // Gestion de la déconnexion
+            const logoutButton = document.getElementById('logout-button');
             if (logoutButton) {
                 logoutButton.addEventListener('click', () => {
                     const form = document.getElementById('logout-form');
@@ -966,8 +1008,7 @@
                 });
             }
 
-            // Gestion du filtre (code existant inchangé)
-            const buttons = document.querySelectorAll('.filter-button[data-popover-target]');
+            // Gestion du filtre
             let selectedValues = {{ selectedValues|json_encode|raw }};
             selectedValues = Array.isArray(selectedValues) ? selectedValues.filter(value => typeof value === 'string' && value.trim() !== '') : [];
 
@@ -1038,29 +1079,6 @@
                 form.submit();
             }
 
-            buttons.forEach(button => {
-                button.addEventListener('click', function (event) {
-                    event.stopPropagation();
-                    const targetId = this.getAttribute('data-popover-target');
-                    const popover = document.getElementById(targetId);
-
-                    if (popover) {
-                        const isOpen = popover.getAttribute('data-state') === 'open';
-                        popover.setAttribute('data-state', isOpen ? 'closed' : 'open');
-                        popover.style.display = isOpen ? 'none' : 'block';
-                        this.setAttribute('aria-expanded', !isOpen);
-
-                        if (!isOpen) {
-                            const commandInput = popover.querySelector('.command-input');
-                            if (commandInput) {
-                                commandInput.value = '';
-                                filterOptions('');
-                            }
-                        }
-                    }
-                });
-            });
-
             function filterOptions(query) {
                 const commandItems = document.querySelectorAll('.command-item:not(.reset)');
                 const lowerQuery = query.toLowerCase().trim();
@@ -1128,20 +1146,6 @@
 
                     updateBadges();
                     submitFilters();
-                });
-            });
-
-            document.addEventListener('click', function (event) {
-                const popovers = document.querySelectorAll('.popover-content');
-                popovers.forEach(popover => {
-                    const button = document.querySelector(`.filter-button[data-popover-target="${popover.id}"]`);
-                    if (!popover.contains(event.target) && !button.contains(event.target)) {
-                        popover.setAttribute('data-state', 'closed');
-                        popover.style.display = 'none';
-                        if (button) {
-                            button.setAttribute('aria-expanded', 'false');
-                        }
-                    }
                 });
             });
         });
