@@ -75,7 +75,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return array_unique($this->roles); // assure que le rôle est unique pour éviter les doublons
+        return array_unique($this->roles);
     }
 
     public function setRoles(array $roles): self
@@ -97,6 +97,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // Si vous avez des données sensibles sur l'utilisateur, effacez-les ici
+        // Effacez les données sensibles si nécessaire
     }
 }
