@@ -15,6 +15,10 @@ class Stage
     #[ORM\Column(name: "STA_ID", type: "integer")]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(targetEntity: Personne::class, inversedBy: "stages")]
+    #[ORM\JoinColumn(name: "PER_ID", referencedColumnName: "PER_ID", nullable: true)]
+    private ?Personne $tuteur = null;
+
     #[ORM\ManyToOne(targetEntity: Entreprise::class, inversedBy: "stages")]
     #[ORM\JoinColumn(name: "ENT_ID", referencedColumnName: "ENT_ID")]
     private ?Entreprise $entreprise = null;
@@ -32,9 +36,6 @@ class Stage
 
     #[ORM\Column(name: "STA_DATEFIN", type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateFin = null;
-
-    #[ORM\Column(name: "STA_TUTEUR", type: "string", length: 100)]
-    private ?string $tuteur = null;
 
     public function getId(): ?int
     {
@@ -96,12 +97,12 @@ class Stage
         return $this;
     }
 
-    public function getTuteur(): ?string
+    public function getTuteur(): ?Personne
     {
         return $this->tuteur;
     }
 
-    public function setTuteur(string $tuteur): self
+    public function setTuteur(?Personne $tuteur): self
     {
         $this->tuteur = $tuteur;
         return $this;
