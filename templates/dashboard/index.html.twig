@@ -167,6 +167,25 @@
             margin-left: 0.25rem;
         }
 
+        .badge-outline {
+            display: inline-block;
+            width: max-content;
+            white-space: nowrap;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            background-color: transparent;
+            color: var(--foreground);
+            border: 1px solid var(--border);
+            border-radius: 0.25rem;
+        }
+
+        .badge-container {
+            display: grid;
+            grid-template-columns: repeat(3, max-content);
+            gap: 0.5rem;
+            justify-content: start;
+        }
+
         .mobile-only {
             display: inline-block;
         }
@@ -843,10 +862,10 @@
                             <th scope="col">ID</th>
                             <th scope="col">Raison Sociale</th>
                             <th scope="col">Adresse</th>
-                            <th scope="col">Code Postal</th>
-                            <th scope="col">Ville</th>
-                            <th scope="col">Téléphone</th>
-                            <th scope="col">Email</th>
+                            <th scope="col">Tuteur</th>
+                            <th scope="col">Profils</th>
+                            <th scope="col">Étudiants</th>
+                            <th scope="col">Jury</th>
                             {% if is_granted('ROLE_ADMIN') %}
                                 <th scope="col">Actions</th>
                             {% endif %}
@@ -857,15 +876,64 @@
                             <tr>
                                 <td>{{ entreprise.id }}</td>
                                 <td>{{ entreprise.rs }}</td>
-                                <td>{{ entreprise.adresse }}</td>
-                                <td>{{ entreprise.cp }}</td>
-                                <td>{{ entreprise.ville }}</td>
-                                <td>{{ entreprise.tel }}</td>
-                                <td>{{ entreprise.mail }}</td>
+                                <td>{{ entreprise.adresse }}<br>{{ entreprise.cp }} {{ entreprise.ville }}</td>
+                                <td>
+                                    {% if entreprise.personnes|length > 0 %}
+                                        {% for tuteur in entreprise.personnes %}
+                                            {{ tuteur.prenom }} {{ tuteur.nom }} ({{ tuteur.fonction }})<br>
+                                            {{ tuteur.email }}<br>
+                                            {{ tuteur.tel }}
+                                        {% endfor %}
+                                    {% else %}
+                                        Aucun tuteur
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entreprise.specialites|length > 0 %}
+                                        <div class="badge-container">
+                                            {% for specialite in entreprise.specialites -%}
+                                                <span class="badge-outline">{{ specialite.nom }}</span>
+                                            {%- endfor %}
+                                        </div>
+                                    {% else %}
+                                        Aucune spécialité
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entreprise.stages|length > 0 %}
+                                        <div class="badge-container">
+                                            {% for stage in entreprise.stages -%}
+                                                {% if stage.etudiant %}
+                                                    <span class="badge-outline">{{ stage.etudiant.prenom }} {{ stage.etudiant.nom }}</span>
+                                                {% endif %}
+                                            {%- endfor %}
+                                        </div>
+                                    {% else %}
+                                        Aucun étudiant
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set hasJury = false %}
+                                    {% if entreprise.personnes|length > 0 %}
+                                        {% for personne in entreprise.personnes %}
+                                            {% if personne.profils|length > 0 %}
+                                                {% for profil in personne.profils %}
+                                                    {% if profil.nom == 'Jury' %}
+                                                        <span class="badge-outline">{{ personne.prenom }} {{ personne.nom }}</span>
+                                                        {% set hasJury = true %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if not hasJury %}
+                                        Aucun jury
+                                    {% endif %}
+                                </td> 
                                 {% if is_granted('ROLE_ADMIN') %}
                                     <td>
                                         <button class="action-button">
-                                            <img src="{{ asset('assets/icons/eye.svg') }}" alt="Delete Icon" class="icon">
+                                            <img src="{{ asset('assets/icons/eye.svg') }}" alt="View Icon" class="icon">
                                         </button>
                                         <button class="action-button">
                                             <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
@@ -873,8 +941,8 @@
                                         <button class="action-button">
                                             <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
                                         </button>
-                                    </td>    
-                                {% endif %}                 
+                                    </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                     </tbody>
