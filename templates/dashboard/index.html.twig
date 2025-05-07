@@ -929,7 +929,7 @@
                                     {% if not hasJury %}
                                         Aucun jury
                                     {% endif %}
-                                </td> 
+                                </td>
                                 {% if is_granted('ROLE_ADMIN') %}
                                     <td>
                                         <button class="action-button">
@@ -938,9 +938,12 @@
                                         <button class="action-button">
                                             <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
                                         </button>
-                                        <button class="action-button">
-                                            <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
-                                        </button>
+                                        <form method="post" action="{{ path('app_entreprise_delete', {'id': entreprise.id}) }}" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entreprise.id) }}">
+                                            <button type="submit" class="action-button">
+                                                <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
+                                            </button>
+                                        </form>
                                     </td>
                                 {% endif %}
                             </tr>
