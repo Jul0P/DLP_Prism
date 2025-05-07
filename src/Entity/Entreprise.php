@@ -38,7 +38,7 @@ class Entreprise
     #[ORM\JoinColumn(name: "PAY_ID", referencedColumnName: "PAY_ID")]
     private ?Pays $pays = null;
 
-    #[ORM\OneToMany(mappedBy: "entreprise", targetEntity: Personne::class)]
+    #[ORM\OneToMany(mappedBy: "entreprise", targetEntity: Personne::class, cascade: ["remove"])]
     private Collection $personnes;
 
     #[ORM\ManyToMany(targetEntity: Specialite::class, inversedBy: "entreprises")]
@@ -47,7 +47,7 @@ class Entreprise
     #[ORM\InverseJoinColumn(name: "SPE_ID", referencedColumnName: "SPE_ID")]
     private Collection $specialites;
 
-    #[ORM\OneToMany(mappedBy: "entreprise", targetEntity: Stage::class)]
+    #[ORM\OneToMany(mappedBy: "entreprise", targetEntity: Stage::class, cascade: ["remove"])]
     private Collection $stages;
 
     public function __construct()

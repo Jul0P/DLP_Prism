@@ -1,6 +1,8 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\Entreprise;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\EntrepriseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,5 +43,27 @@ class DashboardController extends AbstractController
             'facets' => $facets,
             'title' => 'Ville',
         ]);
+    }
+
+    #[Route('/entreprise/delete/{id}', name: 'app_entreprise_delete', methods: ['POST'])]
+    public function delete(Request $request, Entreprise $entreprise, EntityManagerInterface $entityManager): Response
+    {
+        // Vérifier que l'utilisateur a les droits pour supprimer (ROLE_ADMIN)
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        // Vérifier le jeton CSRF pour sécuriser la suppression
+        if ($this->isCsrfTokenValid('delete'.$entreprise->getId(), $request->request->get('_token'))) {
+            // Supprimer l'entreprise (les relations en cascade doivent être configurées dans Doctrine)
+            $entityManager->remove($entreprise);
+            $entityManager->flush();
+
+            // Ajouter un message de confirmation
+            $this->addFlash('success', 'Entreprise supprimée avec succès.');
+        } else {
+            $this->addFlash('error', 'Erreur lors de la suppression de l\'entreprise.');
+        }
+
+        // Rediriger vers la page du tableau de bord
+        return $this->redirectToRoute('app_dashboard');
     }
 }

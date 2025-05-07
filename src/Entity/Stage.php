@@ -16,11 +16,11 @@ class Stage
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Personne::class, inversedBy: "stages")]
-    #[ORM\JoinColumn(name: "PER_ID", referencedColumnName: "PER_ID", nullable: true)]
+    #[ORM\JoinColumn(name: "PER_ID", referencedColumnName: "PER_ID", nullable: true, onDelete: "SET NULL")]
     private ?Personne $tuteur = null;
 
     #[ORM\ManyToOne(targetEntity: Entreprise::class, inversedBy: "stages")]
-    #[ORM\JoinColumn(name: "ENT_ID", referencedColumnName: "ENT_ID")]
+    #[ORM\JoinColumn(name: "ENT_ID", referencedColumnName: "ENT_ID", onDelete: "CASCADE")]
     private ?Entreprise $entreprise = null;
 
     #[ORM\ManyToOne(targetEntity: Etudiant::class, inversedBy: "stages")]
