@@ -180,8 +180,8 @@
         }
 
         .badge-container {
-            display: grid;
-            grid-template-columns: repeat(3, max-content);
+            display: flex;
+            flex-wrap: wrap;
             gap: 0.5rem;
             justify-content: start;
         }
@@ -537,7 +537,23 @@
 
         .table tr[data-state="selected"] {
             background-color: var(--muted);
-        }                               
+        }
+
+        .col-profils {
+            width: 18rem;
+        }
+
+        .col-etudiants {
+            width: 12rem;
+        }
+
+        .col-jury {
+            width: 12rem;
+        }
+
+        .col-actions {
+            width: 8rem;
+        }
 
         .action-button {
             display: inline-flex;
@@ -863,11 +879,11 @@
                             <th scope="col">Raison Sociale</th>
                             <th scope="col">Adresse</th>
                             <th scope="col">Tuteur</th>
-                            <th scope="col">Profils</th>
-                            <th scope="col">Étudiants</th>
-                            <th scope="col">Jury</th>
+                            <th scope="col" class="col-profils">Profils</th>
+                            <th scope="col" class="col-etudiants">Étudiants</th>
+                            <th scope="col" class="col-jury">Jury</th>
                             {% if is_granted('ROLE_ADMIN') %}
-                                <th scope="col">Actions</th>
+                                <th scope="col" class="col-actions">Actions</th>
                             {% endif %}
                         </tr>
                     </thead>
@@ -876,13 +892,14 @@
                             <tr>
                                 <td>{{ entreprise.id }}</td>
                                 <td>{{ entreprise.rs }}</td>
-                                <td>{{ entreprise.adresse }}<br>{{ entreprise.cp }} {{ entreprise.ville }}</td>
+                                <td>{{ entreprise.adresse }} <br>{{ entreprise.cp }} {{ entreprise.ville }}</td>
                                 <td>
                                     {% if entreprise.personnes|length > 0 %}
                                         {% for tuteur in entreprise.personnes %}
                                             {{ tuteur.prenom }} {{ tuteur.nom }} ({{ tuteur.fonction }})<br>
                                             {{ tuteur.email }}<br>
                                             {{ tuteur.tel }}
+                                            {% if not loop.last %}<br>{% endif %}
                                         {% endfor %}
                                     {% else %}
                                         Aucun tuteur
@@ -915,16 +932,18 @@
                                 <td>
                                     {% set hasJury = false %}
                                     {% if entreprise.personnes|length > 0 %}
-                                        {% for personne in entreprise.personnes %}
-                                            {% if personne.profils|length > 0 %}
-                                                {% for profil in personne.profils %}
-                                                    {% if profil.nom == 'Jury' %}
-                                                        <span class="badge-outline">{{ personne.prenom }} {{ personne.nom }}</span>
-                                                        {% set hasJury = true %}
-                                                    {% endif %}
-                                                {% endfor %}
-                                            {% endif %}
-                                        {% endfor %}
+                                        <div class="badge-container">
+                                            {% for personne in entreprise.personnes %}
+                                                {% if personne.profils|length > 0 %}
+                                                    {% for profil in personne.profils %}
+                                                        {% if profil.nom == 'Jury' %}
+                                                            <span class="badge-outline">{{ personne.prenom }} {{ personne.nom }}</span>
+                                                            {% set hasJury = true %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
                                     {% endif %}
                                     {% if not hasJury %}
                                         Aucun jury

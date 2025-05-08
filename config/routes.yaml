@@ -6,11 +6,21 @@ controllers:
 
 app_dashboard:
     path: /
-    controller: App\Controller\DashboardController::index
+    controller: App\Controller\DashboardController::dashboard
+    methods: GET
+
+app_entreprise_delete:
+    path: /entreprise/{id}/delete
+    controller: App\Controller\DashboardController::delete
+    methods: POST
 
 app_login:
     path: /login
     controller: App\Controller\AuthController::login
+
+app_register:
+    path: /register
+    controller: App\Controller\AuthController::register
 
 app_logout:
     path: /logout
