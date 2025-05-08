@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class DashboardController extends AbstractController
 {
     #[Route('/', name: 'app_dashboard')]
-    public function index(Request $request, EntrepriseRepository $entrepriseRepository): Response
+    public function dashboard(Request $request, EntrepriseRepository $entrepriseRepository): Response
     {
         // Récupérer le terme de recherche depuis la requête
         $search = $request->query->get('search', '');
@@ -45,7 +45,7 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    #[Route('/entreprise/delete/{id}', name: 'app_entreprise_delete', methods: ['POST'])]
+    #[Route('/entreprise/{id}/delete', name: 'app_entreprise_delete', methods: ['POST'])]
     public function delete(Request $request, Entreprise $entreprise, EntityManagerInterface $entityManager): Response
     {
         // Vérifier que l'utilisateur a les droits pour supprimer (ROLE_ADMIN)
@@ -56,11 +56,6 @@ class DashboardController extends AbstractController
             // Supprimer l'entreprise (les relations en cascade doivent être configurées dans Doctrine)
             $entityManager->remove($entreprise);
             $entityManager->flush();
-
-            // Ajouter un message de confirmation
-            $this->addFlash('success', 'Entreprise supprimée avec succès.');
-        } else {
-            $this->addFlash('error', 'Erreur lors de la suppression de l\'entreprise.');
         }
 
         // Rediriger vers la page du tableau de bord
