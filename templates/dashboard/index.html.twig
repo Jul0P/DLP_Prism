@@ -177,6 +177,7 @@
             color: var(--foreground);
             border: 1px solid var(--border);
             border-radius: 0.25rem;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
         }
 
         .badge-container {
@@ -638,6 +639,7 @@
         .dropdown-menu-trigger .user-info .username {
             font-size: 0.875rem;
             font-weight: 500;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
         }
 
         .dropdown-menu-trigger .user-info .role {
@@ -761,6 +763,99 @@
 
         .dropdown-menu-trigger[aria-expanded="true"] .chevron {
             transform: rotate(180deg);
+        }
+
+        .dialog {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+        }
+
+        .dialog[data-state="open"] {
+            display: block;
+        }
+
+        .dialog-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .dialog-content {
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            width: 100%;
+            max-width: 700px;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: var(--radius);
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .dialog-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+            text-align: left;
+        }
+
+        .dialog-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            line-height: 1;
+            letter-spacing: -0.025em;
+            color: var(--foreground);
+        }
+
+        .dialog-description {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .dialog-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .dialog-close-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            border-radius: 0.125rem;
+            opacity: 0.7;
+            color: var(--muted-foreground);
+            cursor: pointer;
+            padding: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .dialog-close-icon img {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .dialog-close-icon:hover {
+            background: none;
+            opacity: 1;
+        }
+
+        .dialog-flex {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
     </style>
 {% endblock %}
@@ -889,7 +984,17 @@
                     </thead>
                     <tbody>
                         {% for entreprise in entreprises %}
-                            <tr>
+                            <tr 
+                                data-id="{{ entreprise.id }}"
+                                data-rs="{{ entreprise.rs }}"
+                                data-adresse="{{ entreprise.adresse }} {{ entreprise.cp }} {{ entreprise.ville }}"
+                                data-tel="{{ entreprise.tel ?? 'Non spécifié' }}"
+                                data-mail="{{ entreprise.mail ?? 'Non spécifié' }}"
+                                data-tuteur-names="{{ entreprise.personnes|map(p => p.prenom ~ ' ' ~ p.nom ~ ' (' ~ p.fonction ~ ')' ~ ' ' ~ p.email ~ ' ' ~ p.tel)|join('||') }}"
+                                data-specialite-names="{{ entreprise.specialites|map(s => s.nom)|join('||') }}"
+                                data-etudiant-names="{{ entreprise.stages|map(s => s.etudiant ? s.etudiant.prenom ~ ' ' ~ s.etudiant.nom : '')|filter(name => name)|join('||') }}"
+                                data-jury-names="{{ entreprise.personnes|filter(p => p.profils|filter(profil => profil.nom == 'Jury')|length > 0)|map(p => p.prenom ~ ' ' ~ p.nom)|join('||') }}"
+                            >
                                 <td>{{ entreprise.id }}</td>
                                 <td>{{ entreprise.rs }}</td>
                                 <td>{{ entreprise.adresse }} <br>{{ entreprise.cp }} {{ entreprise.ville }}</td>
@@ -951,7 +1056,7 @@
                                 </td>
                                 {% if is_granted('ROLE_ADMIN') %}
                                     <td>
-                                        <button class="action-button">
+                                        <button class="action-button view-button" data-id="{{ entreprise.id }}">
                                             <img src="{{ asset('assets/icons/eye.svg') }}" alt="View Icon" class="icon">
                                         </button>
                                         <button class="action-button">
@@ -969,6 +1074,41 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                {# Dialogue "Voir" générique #}
+                <div id="dialog-view" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Détails de l’entreprise</h2>
+                            <p class="dialog-description">Informations détaillées sur l’entreprise sélectionnée.</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div id="dialog-view-body" class="dialog-body">
+                            <p><strong>ID :</strong> <span id="view-id"></span></p>
+                            <p><strong>Raison Sociale :</strong> <span id="view-rs"></span></p>
+                            <p><strong>Adresse :</strong> <span id="view-adresse"></span></p>
+                            <p><strong>Téléphone :</strong> <span id="view-tel"></span></p>
+                            <p><strong>Email :</strong> <span id="view-mail"></span></p>
+                            <p><strong>Tuteur :</strong></p>
+                            <div id="view-tuteurs"></div>
+                            <div class="dialog-flex">
+                                <p><strong>Profils :</strong></p>
+                                <div id="view-profils" class="badge-container"></div>
+                            </div>
+                            <div class="dialog-flex">
+                                <p><strong>Étudiants :</strong></p>
+                                <div id="view-etudiants" class="badge-container"></div>
+                            </div>
+                            <div class="dialog-flex">
+                                <p><strong>Jury :</strong></p>
+                                <div id="view-jury" class="badge-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             {% else %}
                 <p>Aucune entreprise trouvée</p>
             {% endif %}
@@ -979,6 +1119,56 @@
 {% block javascripts %}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const dialogView = document.getElementById('dialog-view');
+
+            // Fonction pour ouvrir un dialogue
+            function openDialog(dialog) {
+                closeDialog(); // Ferme tous les dialogues
+                dialog.setAttribute('data-state', 'open');
+            }
+
+            // Fonction pour fermer tous les dialogues
+            function closeDialog() {
+                document.querySelectorAll('.dialog').forEach(dialog => {
+                    dialog.setAttribute('data-state', 'closed');
+                });
+            }
+
+            // Gestion du clic sur le bouton "Fermer" ou l'overlay
+            document.querySelectorAll('.dialog-close-icon, .dialog-overlay').forEach(element => {
+                element.addEventListener('click', closeDialog);
+            });
+
+            // Gestion du clic sur le bouton "Voir"
+            document.querySelectorAll('.action-button.view-button').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) {
+                        const rs = row.getAttribute('data-rs');
+                        const adresse = row.getAttribute('data-adresse');
+                        const tel = row.getAttribute('data-tel');
+                        const mail = row.getAttribute('data-mail');
+                        const tuteurNames = row.getAttribute('data-tuteur-names').split('||').filter(name => name);
+                        const specialiteNames = row.getAttribute('data-specialite-names').split('||').filter(name => name);
+                        const etudiantNames = row.getAttribute('data-etudiant-names').split('||').filter(name => name);
+                        const juryNames = row.getAttribute('data-jury-names').split('||').filter(name => name);
+
+                        document.getElementById('view-id').textContent = id;
+                        document.getElementById('view-rs').textContent = rs;
+                        document.getElementById('view-adresse').textContent = adresse;
+                        document.getElementById('view-tel').textContent = tel;
+                        document.getElementById('view-mail').textContent = mail;
+                        document.getElementById('view-tuteurs').innerHTML = tuteurNames.length > 0 ? tuteurNames.join('<br>') : 'Aucun tuteur';
+                        document.getElementById('view-profils').innerHTML = specialiteNames.length > 0 ? specialiteNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucune spécialité';
+                        document.getElementById('view-etudiants').innerHTML = etudiantNames.length > 0 ? etudiantNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucun étudiant';
+                        document.getElementById('view-jury').innerHTML = juryNames.length > 0 ? juryNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucun jury';
+
+                        openDialog(dialogView);
+                    }
+                });
+            });
+
             // Gestion de la recherche
             const searchForm = document.getElementById('searchForm');
             const searchInput = document.getElementById('searchInput');
