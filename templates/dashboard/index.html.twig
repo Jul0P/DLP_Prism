@@ -857,6 +857,80 @@
             align-items: center;
             gap: 0.5rem;
         }
+
+        .checkbox {
+            margin-right: 0.5rem;
+            accent-color: var(--primary); /* Couleur pour la case cochée */
+        }
+    
+        .form-row-flex {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group-wide {
+            flex: 3;
+        }
+
+        .form-group-narrow {
+            flex: 1;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--foreground); /* Texte */
+            margin-bottom: 5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            color: var(--foreground); /* Texte */
+            background-color: var(--background); /* Fond */
+            border: 1px solid var(--border); /* Bordure */
+            border-radius: var(--radius); /* Coins arrondis */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--ring); /* Bordure au focus */
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            color: var(--foreground); /* Texte */
+            background-color: var(--background); /* Fond */
+            border: 1px solid var(--border); /* Bordure */
+            border-radius: var(--radius); /* Coins arrondis */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-select:focus {
+            border-color: var(--ring); /* Bordure au focus */
+        }
+
+        .form-select-tall {
+            height: 120px;
+        }
     </style>
 {% endblock %}
 
@@ -987,9 +1061,10 @@
                             <tr 
                                 data-id="{{ entreprise.id }}"
                                 data-rs="{{ entreprise.rs }}"
-                                data-adresse="{{ entreprise.adresse }} {{ entreprise.cp }} {{ entreprise.ville }}"
+                                data-adresse="{{ entreprise.rue }} {{ entreprise.cp }} {{ entreprise.ville }}"
                                 data-tel="{{ entreprise.tel ?? 'Non spécifié' }}"
                                 data-mail="{{ entreprise.mail ?? 'Non spécifié' }}"
+                                data-tuteurs="{{ entreprise.personnes|map(p => p.id)|join(',') }}"
                                 data-tuteur-names="{{ entreprise.personnes|map(p => p.prenom ~ ' ' ~ p.nom ~ ' (' ~ p.fonction ~ ')' ~ ' ' ~ p.email ~ ' ' ~ p.tel)|join('||') }}"
                                 data-specialite-names="{{ entreprise.specialites|map(s => s.nom)|join('||') }}"
                                 data-etudiant-names="{{ entreprise.stages|map(s => s.etudiant ? s.etudiant.prenom ~ ' ' ~ s.etudiant.nom : '')|filter(name => name)|join('||') }}"
@@ -997,7 +1072,7 @@
                             >
                                 <td>{{ entreprise.id }}</td>
                                 <td>{{ entreprise.rs }}</td>
-                                <td>{{ entreprise.adresse }} <br>{{ entreprise.cp }} {{ entreprise.ville }}</td>
+                                <td>{{ entreprise.rue }} <br>{{ entreprise.cp }} {{ entreprise.ville }}</td>
                                 <td>
                                     {% if entreprise.personnes|length > 0 %}
                                         {% for tuteur in entreprise.personnes %}
@@ -1059,7 +1134,7 @@
                                         <button class="action-button view-button" data-id="{{ entreprise.id }}">
                                             <img src="{{ asset('assets/icons/eye.svg') }}" alt="View Icon" class="icon">
                                         </button>
-                                        <button class="action-button">
+                                        <button class="action-button edit-button" data-id="{{ entreprise.id }}">
                                             <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
                                         </button>
                                         <form method="post" action="{{ path('app_entreprise_delete', {'id': entreprise.id}) }}" style="display: inline;">
@@ -1109,6 +1184,64 @@
                         </div>
                     </div>
                 </div>
+
+                {# Dialogue "Modifier" générique #}
+                <div id="dialog-edit" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Modifier l’entreprise</h2>
+                            <p class="dialog-description">Modifiez les informations de l’entreprise.</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div id="dialog-edit-body" class="dialog-body">
+                            <form id="edit-entreprise-form" method="post">
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group form-group-wide">
+                                        <label for="edit-rs" class="form-label">Raison Sociale :</label>
+                                        <input type="text" id="edit-rs" name="rs" class="form-input">
+                                    </div>
+                                    <div class="form-group form-group-narrow">
+                                        <label for="edit-cp" class="form-label">Code Postal :</label>
+                                        <input type="text" id="edit-cp" name="cp" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group">
+                                        <label for="edit-rue" class="form-label">Rue :</label>
+                                        <input type="text" id="edit-rue" name="rue" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-ville" class="form-label">Ville :</label>
+                                        <input type="text" id="edit-ville" name="ville" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group form-group-narrow">
+                                        <label for="edit-tel" class="form-label">Téléphone :</label>
+                                        <input type="text" id="edit-tel" name="tel" class="form-input">
+                                    </div>
+                                    <div class="form-group form-group-wide">
+                                        <label for="edit-mail" class="form-label">Email :</label>
+                                        <input type="email" id="edit-mail" name="mail" class="form-input">
+                                    </div>
+                                </div>
+                                {# Tuteurs : Utilisation d'un select multiple #}
+                                <div class="form-group">
+                                    <label for="edit-tuteurs" class="form-label">Tuteurs :</label>
+                                    <select id="edit-tuteurs" name="tuteurs[]" multiple class="form-select form-select-tall">
+                                        {% for personne in allPersonnes %}
+                                            <option value="{{ personne.id }}">{{ personne.prenom }} {{ personne.nom }} ({{ personne.fonction }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="submit-button">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             {% else %}
                 <p>Aucune entreprise trouvée</p>
             {% endif %}
@@ -1120,6 +1253,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const dialogView = document.getElementById('dialog-view');
+            const dialogEdit = document.getElementById('dialog-edit');
+            const editForm = document.getElementById('edit-entreprise-form');
 
             // Fonction pour ouvrir un dialogue
             function openDialog(dialog) {
@@ -1165,6 +1300,51 @@
                         document.getElementById('view-jury').innerHTML = juryNames.length > 0 ? juryNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucun jury';
 
                         openDialog(dialogView);
+                    }
+                });
+            });
+
+            // Gestion du clic sur le bouton "Modifier"
+            document.querySelectorAll('.action-button.edit-button').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) {
+                        const rs = row.getAttribute('data-rs');
+                        const adresseFull = row.getAttribute('data-adresse');
+                        let rue = '';
+                        let cp = '';
+                        let ville = '';
+                        const adresseMatch = adresseFull.match(/^(.*?)(\d{5})\s+(.+)$/);
+                        if (adresseMatch) {
+                            rue = adresseMatch[1].trim();
+                            cp = adresseMatch[2].trim();
+                            ville = adresseMatch[3].trim();
+                        } else {
+                            rue = adresseFull;
+                        }
+                        const tel = row.getAttribute('data-tel');
+                        const mail = row.getAttribute('data-mail');
+                        const selectedTuteurs = row.getAttribute('data-tuteurs').split(',').filter(id => id);
+
+                        // Remplir les champs texte
+                        document.getElementById('edit-rs').value = rs;
+                        document.getElementById('edit-rue').value = rue;
+                        document.getElementById('edit-cp').value = cp;
+                        document.getElementById('edit-ville').value = ville;
+                        document.getElementById('edit-tel').value = tel;
+                        document.getElementById('edit-mail').value = mail;
+
+                        // Remplir les sélections multiples
+                        const tuteursSelect = document.getElementById('edit-tuteurs');
+                        Array.from(tuteursSelect.options).forEach(option => {
+                            option.selected = selectedTuteurs.includes(option.value);
+                        });
+
+                        // Mettre à jour l'action du formulaire
+                        editForm.action = "{{ path('app_entreprise_edit', {'id': 'placeholder'}) }}".replace('placeholder', id);
+
+                        openDialog(dialogEdit);
                     }
                 });
             });
