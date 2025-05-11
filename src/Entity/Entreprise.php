@@ -19,8 +19,8 @@ class Entreprise
     #[ORM\Column(name: "ENT_RS", type: "string", length: 100, nullable: true)]
     private ?string $rs = null;
 
-    #[ORM\Column(name: "ENT_ADRESSE", type: "string", length: 100, nullable: true)]
-    private ?string $adresse = null;
+    #[ORM\Column(name: "ENT_RUE", type: "string", length: 100, nullable: true)]
+    private ?string $rue = null;
 
     #[ORM\Column(name: "ENT_CP", type: "string", length: 5, nullable: true)]
     private ?string $cp = null;
@@ -73,14 +73,14 @@ class Entreprise
         return $this;
     }
 
-    public function getAdresse(): ?string
+    public function getRue(): ?string
     {
-        return $this->adresse;
+        return $this->rue;
     }
 
-    public function setAdresse(?string $adresse): self
+    public function setRue(?string $rue): self
     {
-        $this->adresse = $adresse;
+        $this->rue = $rue;
         return $this;
     }
 
