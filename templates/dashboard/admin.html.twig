@@ -1,0 +1,650 @@
+{% extends 'layouts/dashboard.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .flex.table-sections {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: nowrap;
+        }
+
+        .table-section {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .separator-vertical {
+            width: 1px;
+            background-color: var(--border);
+            margin: 0 0.5rem;
+            flex-shrink: 0;
+            height: 100%;
+            transition: background-color 0.5s ease, height 0.5s ease;
+        }
+
+        .roles-checkboxes {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .roles-checkboxes label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .flex.table-sections {
+                flex-direction: column;
+            }
+
+            .separator-vertical {
+                display: none;
+            }
+
+            .table-section {
+                min-width: 100%;
+            }
+        }
+
+        .col-actions {
+            width: 6rem;
+        }
+    </style>
+{% endblock %}
+
+{% block title %}Prism - Administration{% endblock %}
+
+{% block main %}
+    <!-- Liste des utilisateurs -->
+    <div class="table-header">
+        <h2 class="title">Liste des utilisateurs</h2>
+        <p class="subtitle">Gérez les utilisateurs de l'application</p>
+    </div>
+    <div class="table-container">
+        <div class="toolbar-container">
+            <form method="get" action="{{ path('app_admin') }}" id="searchForm">
+                <input type="text" name="search" value="{{ search }}" placeholder="Recherche..." id="searchInput" class="search-input">
+            </form>
+            {% if is_granted('ROLE_ADMIN') %}
+                <button class="add-button" data-dialog-target="dialog-add-user">
+                    <img src="{{ asset('assets/icons/plus.svg') }}" alt="Circle Plus Icon" class="icon">
+                    <span>Ajouter un utilisateur</span>
+                </button>
+            {% endif %}
+        </div>
+        <div class="table-wrapper">
+            {% if users|length > 0 %}
+                <table class="table" id="user-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nom</th>
+                            <th scope="col">Prénom</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Rôles</th>
+                            <th scope="col" class="col-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr data-id="{{ user.id }}"
+                                data-user-nom="{{ user.nom }}"
+                                data-user-prenom="{{ user.prenom }}"
+                                data-user-email="{{ user.email }}"
+                                data-user-roles="{{ user.roles|join(',') }}">
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.nom }}</td>
+                                <td>{{ user.prenom }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    {% if 'ROLE_ADMIN' in user.roles %}
+                                        Administrateur
+                                    {% else %}
+                                        Enseignant
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="action-button user-edit" data-id="{{ user.id }}">
+                                        <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
+                                    </button>
+                                    <form method="post" action="{{ path('app_admin_user_delete', {'id': user.id}) }}" style="display: inline;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                        <button type="submit" class="action-button">
+                                            <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Dialogue Ajouter Utilisateur -->
+                <div id="dialog-add-user" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Ajouter un utilisateur</h2>
+                            <p class="dialog-description">Ajoutez un nouvel utilisateur avec ses informations personnelles et rôles</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div class="dialog-body">
+                            <form id="add-user-form" method="post" action="{{ path('app_admin_user_create') }}">
+                                <div class="form-group">
+                                    <label class="form-label" for="add-user-nom">Nom :</label>
+                                    <input type="text" id="add-user-nom" name="nom" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="add-user-prenom">Prénom :</label>
+                                    <input type="text" id="add-user-prenom" name="prenom" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="add-user-email">Email :</label>
+                                    <input type="email" id="add-user-email" name="email" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="add-user-password">Mot de passe :</label>
+                                    <input type="password" id="add-user-password" name="password" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Rôles :</label>
+                                    <div class="roles-checkboxes">
+                                        <label>
+                                            <input type="checkbox" name="user_roles[]" value="ROLE_USER" checked> Enseignant
+                                        </label>
+                                        <label>
+                                            <input type="checkbox" name="user_roles[]" value="ROLE_ADMIN"> Administrateur
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="submit-button">Ajouter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialogue Modifier Utilisateur -->
+                <div id="dialog-edit-user" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Modifier l’utilisateur</h2>
+                            <p class="dialog-description">Modifiez les informations de l’utilisateur sélectionné</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div class="dialog-body">
+                            <form id="edit-user-form" method="post">
+                                <div class="form-group">
+                                    <label class="form-label" for="edit-user-nom">Nom :</label>
+                                    <input type="text" id="edit-user-nom" name="nom" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="edit-user-prenom">Prénom :</label>
+                                    <input type="text" id="edit-user-prenom" name="prenom" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="edit-user-email">Email :</label>
+                                    <input type="email" id="edit-user-email" name="email" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="edit-user-password">Mot de passe (laisser vide pour ne pas modifier) :</label>
+                                    <input type="password" id="edit-user-password" name="password" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Rôles :</label>
+                                    <div class="roles-checkboxes">
+                                        <label>
+                                            <input type="checkbox" name="user_roles[]" value="ROLE_USER"> Enseignant
+                                        </label>
+                                        <label>
+                                            <input type="checkbox" name="user_roles[]" value="ROLE_ADMIN"> Administrateur
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="submit-button">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p>Aucun utilisateur trouvé</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sections pour Pays, Spécialités, Profils -->
+    <div class="flex table-sections">
+        <!-- Liste des pays -->
+        <div class="table-section">
+            <div class="table-header">
+                <h2 class="title">Liste des pays</h2>
+                <p class="subtitle">Gérez les pays disponibles dans l'application</p>
+            </div>
+            <div class="table-container">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <div class="toolbar-container">
+                        <button class="add-button" data-dialog-target="dialog-add-pays">
+                            <img src="{{ asset('assets/icons/plus.svg') }}" alt="Add Icon" class="icon">
+                            <span>Ajouter un pays</span>
+                        </button>
+                    </div>
+                {% endif %}
+                <div class="table-wrapper">
+                    {% if pays|length > 0 %}
+                        <table class="table" id="pays-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Nom</th>
+                                    <th scope="col" class="col-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pays in pays %}
+                                    <tr data-id="{{ pays.id }}"
+                                        data-pays-nom="{{ pays.nom }}">
+                                        <td>{{ pays.id }}</td>
+                                        <td>{{ pays.nom }}</td>
+                                        <td>
+                                            <button class="action-button pays-edit" data-id="{{ pays.id }}">
+                                                <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
+                                            </button>
+                                            <form method="post" action="{{ path('app_admin_pays_delete', {'id': pays.id}) }}" style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ pays.id) }}">
+                                                <button type="submit" class="action-button">
+                                                    <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Dialogue Ajouter Pays -->
+                        <div id="dialog-add-pays" class="dialog" data-state="closed">
+                            <div class="dialog-overlay"></div>
+                            <div class="dialog-content">
+                                <div class="dialog-header">
+                                    <h2 class="dialog-title">Ajouter un pays</h2>
+                                    <p class="dialog-description">Ajoutez un nouveau pays à la liste</p>
+                                    <button class="dialog-close-icon">
+                                        <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                                    </button>
+                                </div>
+                                <div class="dialog-body">
+                                    <form id="add-pays-form" method="post" action="{{ path('app_admin_pays_create') }}">
+                                        <div class="form-group">
+                                            <label class="form-label" for="add-pays-nom">Nom :</label>
+                                            <input type="text" id="add-pays-nom" name="nom" class="form-input" required>
+                                        </div>
+                                        <button type="submit" class="submit-button">Ajouter</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dialogue Modifier Pays -->
+                        <div id="dialog-edit-pays" class="dialog" data-state="closed">
+                            <div class="dialog-overlay"></div>
+                            <div class="dialog-content">
+                                <div class="dialog-header">
+                                    <h2 class="dialog-title">Modifier le pays</h2>
+                                    <p class="dialog-description">Modifiez le nom du pays sélectionné</p>
+                                    <button class="dialog-close-icon">
+                                        <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                                    </button>
+                                </div>
+                                <div class="dialog-body">
+                                    <form id="edit-pays-form" method="post">
+                                        <div class="form-group">
+                                            <label class="form-label" for="edit-pays-nom">Nom :</label>
+                                            <input type="text" id="edit-pays-nom" name="nom" class="form-input" required>
+                                        </div>
+                                        <button type="submit" class="submit-button">Enregistrer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p>Aucun pays trouvé</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="separator-vertical"></div>
+
+        <!-- Liste des spécialités -->
+        <div class="table-section">
+            <div class="table-header">
+                <h2 class="title">Liste des spécialités</h2>
+                <p class="subtitle">Gérez les spécialités disponibles dans l'application</p>
+            </div>
+            <div class="table-container">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <div class="toolbar-container">
+                        <button class="add-button" data-dialog-target="dialog-add-specialite">
+                            <img src="{{ asset('assets/icons/plus.svg') }}" alt="Add Icon" class="icon">
+                            <span>Ajouter une spécialité</span>
+                        </button>
+                    </div>
+                {% endif %}
+                <div class="table-wrapper">
+                    {% if specialites|length > 0 %}
+                        <table class="table" id="specialite-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Nom</th>
+                                    <th scope="col" class="col-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for specialite in specialites %}
+                                    <tr data-id="{{ specialite.id }}"
+                                        data-specialite-nom="{{ specialite.nom }}">
+                                        <td>{{ specialite.id }}</td>
+                                        <td>{{ specialite.nom }}</td>
+                                        <td>
+                                            <button class="action-button specialite-edit" data-id="{{ specialite.id }}">
+                                                <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
+                                            </button>
+                                            <form method="post" action="{{ path('app_admin_specialite_delete', {'id': specialite.id}) }}" style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ specialite.id) }}">
+                                                <button type="submit" class="action-button">
+                                                    <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Dialogue Ajouter Spécialité -->
+                        <div id="dialog-add-specialite" class="dialog" data-state="closed">
+                            <div class="dialog-overlay"></div>
+                            <div class="dialog-content">
+                                <div class="dialog-header">
+                                    <h2 class="dialog-title">Ajouter une spécialité</h2>
+                                    <p class="dialog-description">Ajoutez une nouvelle spécialité à la liste</p>
+                                    <button class="dialog-close-icon">
+                                        <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                                    </button>
+                                </div>
+                                <div class="dialog-body">
+                                    <form id="add-specialite-form" method="post" action="{{ path('app_admin_specialite_create') }}">
+                                        <div class="form-group">
+                                            <label class="form-label" for="add-specialite-nom">Nom :</label>
+                                            <input type="text" id="add-specialite-nom" name="nom" class="form-input" required>
+                                        </div>
+                                        <button type="submit" class="submit-button">Ajouter</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dialogue Modifier Spécialité -->
+                        <div id="dialog-edit-specialite" class="dialog" data-state="closed">
+                            <div class="dialog-overlay"></div>
+                            <div class="dialog-content">
+                                <div class="dialog-header">
+                                    <h2 class="dialog-title">Modifier la spécialité</h2>
+                                    <p class="dialog-description">Modifiez le nom de la spécialité sélectionnée</p>
+                                    <button class="dialog-close-icon">
+                                        <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                                    </button>
+                                </div>
+                                <div class="dialog-body">
+                                    <form id="edit-specialite-form" method="post">
+                                        <div class="form-group">
+                                            <label class="form-label" for="edit-specialite-nom">Nom :</label>
+                                            <input type="text" id="edit-specialite-nom" name="nom" class="form-input" required>
+                                        </div>
+                                        <button type="submit" class="submit-button">Enregistrer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p>Aucune spécialité trouvée</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="separator-vertical"></div>
+
+        <!-- Liste des profils -->
+        <div class="table-section">
+            <div class="table-header">
+                <h2 class="title">Liste des profils</h2>
+                <p class="subtitle">Gérez les profils disponibles dans l'application</p>
+            </div>
+            <div class="table-container">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <div class="toolbar-container">
+                        <button class="add-button" data-dialog-target="dialog-add-profil">
+                            <img src="{{ asset('assets/icons/plus.svg') }}" alt="Add Icon" class="icon">
+                            <span>Ajouter un profil</span>
+                        </button>
+                    </div>
+                {% endif %}
+                <div class="table-wrapper">
+                    {% if profils|length > 0 %}
+                        <table class="table" id="profil-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Nom</th>
+                                    <th scope="col" class="col-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for profil in profils %}
+                                    <tr data-id="{{ profil.id }}"
+                                        data-profil-nom="{{ profil.nom }}">
+                                        <td>{{ profil.id }}</td>
+                                        <td>{{ profil.nom }}</td>
+                                        <td>
+                                            <button class="action-button profil-edit" data-id="{{ profil.id }}">
+                                                <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
+                                            </button>
+                                            <form method="post" action="{{ path('app_admin_profil_delete', {'id': profil.id}) }}" style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ profil.id) }}">
+                                                <button type="submit" class="action-button">
+                                                    <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Dialogue Ajouter Profil -->
+                        <div id="dialog-add-profil" class="dialog" data-state="closed">
+                            <div class="dialog-overlay"></div>
+                            <div class="dialog-content">
+                                <div class="dialog-header">
+                                    <h2 class="dialog-title">Ajouter un profil</h2>
+                                    <p class="dialog-description">Ajoutez un nouveau profil à la liste</p>
+                                    <button class="dialog-close-icon">
+                                        <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                                    </button>
+                                </div>
+                                <div class="dialog-body">
+                                    <form id="add-profil-form" method="post" action="{{ path('app_admin_profil_create') }}">
+                                        <div class="form-group">
+                                            <label class="form-label" for="add-profil-nom">Nom :</label>
+                                            <input type="text" id="add-profil-nom" name="nom" class="form-input" required>
+                                        </div>
+                                        <button type="submit" class="submit-button">Ajouter</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dialogue Modifier Profil -->
+                        <div id="dialog-edit-profil" class="dialog" data-state="closed">
+                            <div class="dialog-overlay"></div>
+                            <div class="dialog-content">
+                                <div class="dialog-header">
+                                    <h2 class="dialog-title">Modifier le profil</h2>
+                                    <p class="dialog-description">Modifiez le nom du profil sélectionné</p>
+                                    <button class="dialog-close-icon">
+                                        <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                                    </button>
+                                </div>
+                                <div class="dialog-body">
+                                    <form id="edit-profil-form" method="post">
+                                        <div class="form-group">
+                                            <label class="form-label" for="edit-profil-nom">Nom :</label>
+                                            <input type="text" id="edit-profil-nom" name="nom" class="form-input" required>
+                                        </div>
+                                        <button type="submit" class="submit-button">Enregistrer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p>Aucun profil trouvé</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Fonction générique pour ouvrir un dialogue
+            function openDialog(dialog) {
+                document.querySelectorAll('.dialog').forEach(d => d.setAttribute('data-state', 'closed'));
+                dialog.setAttribute('data-state', 'open');
+            }
+
+            // Fonction pour fermer tous les dialogues
+            function closeDialog() {
+                document.querySelectorAll('.dialog').forEach(d => d.setAttribute('data-state', 'closed'));
+            }
+
+            // Gestion des fermetures de dialogues
+            document.querySelectorAll('.dialog-close-icon, .dialog-overlay').forEach(el => {
+                el.addEventListener('click', closeDialog);
+            });
+
+            // --- Utilisateurs ---
+            const dialogAddUser = document.getElementById('dialog-add-user');
+            const dialogEditUser = document.getElementById('dialog-edit-user');
+            const editUserForm = document.getElementById('edit-user-form');
+
+            document.querySelectorAll('#user-table .user-edit').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`#user-table tr[data-id="${id}"]`);
+                    if (row) {
+                        document.getElementById('edit-user-nom').value = row.getAttribute('data-user-nom') || '';
+                        document.getElementById('edit-user-prenom').value = row.getAttribute('data-user-prenom') || '';
+                        document.getElementById('edit-user-email').value = row.getAttribute('data-user-email');
+
+                        const roles = row.getAttribute('data-user-roles').split(',');
+                        document.querySelectorAll('input[name="user_roles[]"]').forEach(checkbox => {
+                            checkbox.checked = roles.includes(checkbox.value);
+                        });
+
+                        editUserForm.action = `/admin/user/${id}/edit`; // Ajustez selon votre route
+                        openDialog(dialogEditUser);
+                    }
+                });
+            });
+
+            document.querySelector('.add-button[data-dialog-target="dialog-add-user"]').addEventListener('click', function () {
+                document.getElementById('add-user-form').reset();
+                document.querySelector('input[name="user_roles[]"][value="ROLE_USER"]').checked = true;
+                openDialog(dialogAddUser);
+            });
+
+            // --- Pays ---
+            const dialogAddPays = document.getElementById('dialog-add-pays');
+            const dialogEditPays = document.getElementById('dialog-edit-pays');
+            const editPaysForm = document.getElementById('edit-pays-form');
+
+            document.querySelectorAll('#pays-table .pays-edit').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`#pays-table tr[data-id="${id}"]`);
+                    if (row) {
+                        document.getElementById('edit-pays-nom').value = row.getAttribute('data-pays-nom');
+                        editPaysForm.action = `/admin/pays/${id}/edit`; // Ajustez selon votre route
+                        openDialog(dialogEditPays);
+                    }
+                });
+            });
+
+            document.querySelector('.add-button[data-dialog-target="dialog-add-pays"]').addEventListener('click', function () {
+                document.getElementById('add-pays-form').reset();
+                openDialog(dialogAddPays);
+            });
+
+            // --- Spécialités ---
+            const dialogAddSpecialite = document.getElementById('dialog-add-specialite');
+            const dialogEditSpecialite = document.getElementById('dialog-edit-specialite');
+            const editSpecialiteForm = document.getElementById('edit-specialite-form');
+
+            document.querySelectorAll('#specialite-table .specialite-edit').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`#specialite-table tr[data-id="${id}"]`);
+                    if (row) {
+                        document.getElementById('edit-specialite-nom').value = row.getAttribute('data-specialite-nom');
+                        editSpecialiteForm.action = `/admin/specialite/${id}/edit`; // Ajustez selon votre route
+                        openDialog(dialogEditSpecialite);
+                    }
+                });
+            });
+
+            document.querySelector('.add-button[data-dialog-target="dialog-add-specialite"]').addEventListener('click', function () {
+                document.getElementById('add-specialite-form').reset();
+                openDialog(dialogAddSpecialite);
+            });
+
+            // --- Profils ---
+            const dialogAddProfil = document.getElementById('dialog-add-profil');
+            const dialogEditProfil = document.getElementById('dialog-edit-profil');
+            const editProfilForm = document.getElementById('edit-profil-form');
+
+            document.querySelectorAll('#profil-table .profil-edit').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`#profil-table tr[data-id="${id}"]`);
+                    if (row) {
+                        document.getElementById('edit-profil-nom').value = row.getAttribute('data-profil-nom');
+                        editProfilForm.action = `/admin/profils/${id}/edit`; // Ajustez selon votre route
+                        openDialog(dialogEditProfil);
+                    }
+                });
+            });
+
+            document.querySelector('.add-button[data-dialog-target="dialog-add-profil"]').addEventListener('click', function () {
+                document.getElementById('add-profil-form').reset();
+                openDialog(dialogAddProfil);
+            });
+        });
+    </script>
+{% endblock %}

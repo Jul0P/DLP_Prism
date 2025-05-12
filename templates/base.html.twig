@@ -4,29 +4,20 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}Prism{% endblock %}</title>
+        <script>
+            (function() {
+                const theme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+            })();
+        </script>
         <link rel="stylesheet" href="{{ asset('css/normalize.css') }}">
         <link rel="stylesheet" href="{{ asset('css/reset.css') }}">
         <link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ 'now'|date('U') }}"> {# TODO: Paramètre de requête pour forcer le navigateur à recharger le fichier CSS à retirer en production #}
         <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-        {% block stylesheets %}
-        {% endblock %}
+        {% block stylesheets %}{% endblock %}
     </head>
     <body>
-        <header>
-            {% block header %}
-                <h1>Prism</h1>
-            {% endblock %}
-        </header>
-        <main>
-            {% block main %}{% endblock %}
-        </main>
-        <footer>
-            {% block footer %}
-                {# affiche l'année en cours #}
-                <p>© {{ 'now'|date('Y') }} Prism. Tous droits réservés.</p>
-            {% endblock %}
-        </footer>
-        {% block javascripts %}
-        {% endblock %}
+        {% block body %}{% endblock %}
+        {% block javascripts %}{% endblock %}
     </body>
 </html>

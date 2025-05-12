@@ -1,0 +1,302 @@
+{% extends 'layouts/dashboard.html.twig' %}
+
+{% block title %}Prism - Liste des stages{% endblock %}
+
+{% block main %}
+    <div class="table-header">
+        <h2 class="title">Liste des stages</h2>
+        <p class="subtitle">Voici une liste des stages effectués par les étudiants.</p>
+    </div>
+    <div class="table-container">
+        <div class="toolbar-container">
+            <form method="get" action="{{ path('app_stage') }}" id="searchForm">
+                <input type="text" name="search" value="{{ search }}" placeholder="Recherche..." id="searchInput" class="search-input">
+            </form>
+            {% if is_granted('ROLE_ADMIN') %}
+                <button class="add-button">
+                    <img src="{{ asset('assets/icons/plus.svg') }}" alt="Circle Plus Icon" class="icon">
+                    <span>Ajouter un stage</span>
+                </button>
+            {% endif %}
+        </div>
+        <div class="table-wrapper">
+            {% if stages|length > 0 %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Date Début</th>
+                            <th scope="col">Date Fin</th>
+                            <th scope="col">Entreprise</th>
+                            <th scope="col">Étudiant</th>
+                            <th scope="col">Spécialité</th>
+                            <th scope="col">Personne</th>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <th scope="col" class="col-actions">Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stage in stages %}
+                            <tr data-id="{{ stage.id }}"
+                                data-date-debut="{{ stage.dateDebut ? stage.dateDebut|date('Y-m-d') : '' }}"
+                                data-date-fin="{{ stage.dateFin ? stage.dateFin|date('Y-m-d') : '' }}"
+                                data-entreprise-id="{{ stage.entreprise ? stage.entreprise.id : '' }}"
+                                data-entreprise-nom="{{ stage.entreprise ? stage.entreprise.rs : 'Aucune' }}"
+                                data-etudiant-id="{{ stage.etudiant ? stage.etudiant.id : '' }}"
+                                data-etudiant-nom="{{ stage.etudiant ? stage.etudiant.prenom ~ ' ' ~ stage.etudiant.nom : 'Aucun' }}"
+                                data-specialite-id="{{ stage.specialite ? stage.specialite.id : '' }}"
+                                data-specialite-nom="{{ stage.specialite ? stage.specialite.nom : 'Aucune' }}"
+                                data-personne-id="{{ stage.employe ? stage.employe.id : '' }}"
+                                data-personne-nom="{{ stage.employe ? stage.employe.prenom ~ ' ' ~ stage.employe.nom : 'Aucun' }}">
+                                <td>{{ stage.id }}</td>
+                                <td>{{ stage.dateDebut ? stage.dateDebut|date('d/m/Y') : 'N/A' }}</td>
+                                <td>{{ stage.dateFin ? stage.dateFin|date('d/m/Y') : 'N/A' }}</td>
+                                <td>{{ stage.entreprise ? stage.entreprise.rs : 'Aucune' }}</td>
+                                <td>{{ stage.etudiant ? stage.etudiant.prenom ~ ' ' ~ stage.etudiant.nom : 'Aucun' }}</td>
+                                <td>{{ stage.specialite ? stage.specialite.nom : 'Aucune' }}</td>
+                                <td>{{ stage.employe ? stage.employe.prenom ~ ' ' ~ stage.employe.nom : 'Aucun' }}</td>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <td>
+                                        <button class="action-button view-button" data-id="{{ stage.id }}">
+                                            <img src="{{ asset('assets/icons/eye.svg') }}" alt="View Icon" class="icon">
+                                        </button>
+                                        <button class="action-button edit-button" data-id="{{ stage.id }}">
+                                            <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
+                                        </button>
+                                        <form method="post" action="{{ path('app_stage_delete', {'id': stage.id}) }}" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ stage.id) }}">
+                                            <button type="submit" class="action-button">
+                                                <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
+                                            </button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Dialogue Voir -->
+                <div id="dialog-view" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Détails du stage</h2>
+                            <p class="dialog-description">Informations détaillées sur le stage sélectionné.</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div id="dialog-view-body" class="dialog-body">
+                            <p><strong>ID :</strong> <span id="view-id"></span></p>
+                            <p><strong>Date Début :</strong> <span id="view-date-debut"></span></p>
+                            <p><strong>Date Fin :</strong> <span id="view-date-fin"></span></p>
+                            <p><strong>Entreprise :</strong> <span id="view-entreprise"></span></p>
+                            <p><strong>Étudiant :</strong> <span id="view-etudiant"></span></p>
+                            <p><strong>Spécialité :</strong> <span id="view-specialite"></span></p>
+                            <p><strong>Personne :</strong> <span id="view-personne"></span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialogue Modifier -->
+                <div id="dialog-edit" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Modifier le stage</h2>
+                            <p class="dialog-description">Modifiez les informations du stage sélectionné</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div class="dialog-body">
+                            <form id="edit-stage-form" method="post">
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group">
+                                        <label for="edit-date_debut" class="form-label">Date Début :</label>
+                                        <input type="date" id="edit-date_debut" name="date_debut" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-date_fin" class="form-label">Date Fin :</label>
+                                        <input type="date" id="edit-date_fin" name="date_fin" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-entreprise" class="form-label">Entreprise :</label>
+                                    <select id="edit-entreprise" name="entreprise" class="form-select">
+                                        <option value="">Aucune</option>
+                                        {% for entreprise in allEntreprises %}
+                                            <option value="{{ entreprise.id }}">{{ entreprise.rs }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-etudiant" class="form-label">Étudiant :</label>
+                                    <select id="edit-etudiant" name="etudiant" class="form-select">
+                                        <option value="">Aucun</option>
+                                        {% for etudiant in allEtudiants %}
+                                            <option value="{{ etudiant.id }}">{{ etudiant.prenom }} {{ etudiant.nom }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-specialite" class="form-label">Spécialité :</label>
+                                    <select id="edit-specialite" name="specialite" class="form-select">
+                                        <option value="">Aucune</option>
+                                        {% for specialite in allSpecialites %}
+                                            <option value="{{ specialite.id }}">{{ specialite.nom }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-personne" class="form-label">Personne :</label>
+                                    <select id="edit-personne" name="personne" class="form-select">
+                                        <option value="">Aucune</option>
+                                        {% for personne in allPersonnes %}
+                                            <option value="{{ personne.id }}">{{ personne.prenom }} {{ personne.nom }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="submit-button">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialogue Ajouter -->
+                <div id="dialog-add" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Ajouter un stage</h2>
+                            <p class="dialog-description">Ajoutez un nouveau stage</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div class="dialog-body">
+                            <form id="add-stage-form" method="post" action="{{ path('app_stage_create') }}">
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group">
+                                        <label for="add-date_debut" class="form-label">Date Début :</label>
+                                        <input type="date" id="add-date_debut" name="date_debut" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="add-date_fin" class="form-label">Date Fin :</label>
+                                        <input type="date" id="add-date_fin" name="date_fin" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-entreprise" class="form-label">Entreprise :</label>
+                                    <select id="add-entreprise" name="entreprise" class="form-select">
+                                        <option value="">Aucune</option>
+                                        {% for entreprise in allEntreprises %}
+                                            <option value="{{ entreprise.id }}">{{ entreprise.rs }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-etudiant" class="form-label">Étudiant :</label>
+                                    <select id="add-etudiant" name="etudiant" class="form-select">
+                                        <option value="">Aucun</option>
+                                        {% for etudiant in allEtudiants %}
+                                            <option value="{{ etudiant.id }}">{{ etudiant.prenom }} {{ etudiant.nom }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-specialite" class="form-label">Spécialité :</label>
+                                    <select id="add-specialite" name="specialite" class="form-select">
+                                        <option value="">Aucune</option>
+                                        {% for specialite in allSpecialites %}
+                                            <option value="{{ specialite.id }}">{{ specialite.nom }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-personne" class="form-label">Personne :</label>
+                                    <select id="add-personne" name="personne" class="form-select">
+                                        <option value="">Aucune</option>
+                                        {% for personne in allPersonnes %}
+                                            <option value="{{ personne.id }}">{{ personne.prenom }} {{ personne.nom }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="submit-button">Ajouter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p>Aucun stage trouvé</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dialogView = document.getElementById('dialog-view');
+            const dialogEdit = document.getElementById('dialog-edit');
+            const dialogAdd = document.getElementById('dialog-add');
+            const editForm = document.getElementById('edit-stage-form');
+
+            function openDialog(dialog) {
+                document.querySelectorAll('.dialog').forEach(d => d.setAttribute('data-state', 'closed'));
+                dialog.setAttribute('data-state', 'open');
+            }
+
+            function closeDialog() {
+                document.querySelectorAll('.dialog').forEach(d => d.setAttribute('data-state', 'closed'));
+            }
+
+            document.querySelectorAll('.dialog-close-icon, .dialog-overlay').forEach(el => {
+                el.addEventListener('click', closeDialog);
+            });
+
+            // Gestion du clic sur le bouton "Voir"
+            document.querySelectorAll('.view-button').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) {
+                        document.getElementById('view-id').textContent = id;
+                        document.getElementById('view-date-debut').textContent = row.getAttribute('data-date-debut') ? new Date(row.getAttribute('data-date-debut')).toLocaleDateString('fr-FR') : 'N/A';
+                        document.getElementById('view-date-fin').textContent = row.getAttribute('data-date-fin') ? new Date(row.getAttribute('data-date-fin')).toLocaleDateString('fr-FR') : 'N/A';
+                        document.getElementById('view-entreprise').textContent = row.getAttribute('data-entreprise-nom');
+                        document.getElementById('view-etudiant').textContent = row.getAttribute('data-etudiant-nom');
+                        document.getElementById('view-specialite').textContent = row.getAttribute('data-specialite-nom');
+                        document.getElementById('view-personne').textContent = row.getAttribute('data-personne-nom');
+                        openDialog(dialogView);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.edit-button').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) {
+                        document.getElementById('edit-date_debut').value = row.getAttribute('data-date-debut');
+                        document.getElementById('edit-date_fin').value = row.getAttribute('data-date-fin');
+                        document.getElementById('edit-entreprise').value = row.getAttribute('data-entreprise-id');
+                        document.getElementById('edit-etudiant').value = row.getAttribute('data-etudiant-id');
+                        document.getElementById('edit-specialite').value = row.getAttribute('data-specialite-id');
+                        document.getElementById('edit-personne').value = row.getAttribute('data-personne-id');
+                        editForm.action = "{{ path('app_stage_edit', {'id': 'placeholder'}) }}".replace('placeholder', id);
+                        openDialog(dialogEdit);
+                    }
+                });
+            });
+
+            document.querySelector('.add-button').addEventListener('click', function () {
+                document.getElementById('add-stage-form').reset();
+                openDialog(dialogAdd);
+            });
+        });
+    </script>
+{% endblock %}

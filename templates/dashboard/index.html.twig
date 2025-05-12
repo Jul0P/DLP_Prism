@@ -1,1613 +1,207 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/dashboard.html.twig' %}
 
 {% block stylesheets %}
+    {{ parent() }}
     <style>
-        main {
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        header {
+        .info-card {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem 2rem;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            background-color: var(--background);
-            z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            background-color: var(--card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            transition: box-shadow 0.5s ease, transform 0.5s ease, background-color 0.5s ease, color 0.5s ease;
         }
 
-        .logo {
-            width: 200px;
-            height: auto;
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, opacity 0.5s ease, filter 0.5s ease;
+        .info-card:hover {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            transform: translateY(-2px);
         }
 
-        .title {
-            font-size: 2rem;
-            font-weight: bold;
-            letter-spacing: -0.02em;
-            color: var(--foreground);
-            margin-bottom: 0.5rem;
+        .info-card-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            background-color: var(--muted);
+            transition: background-color 0.5s ease;
         }
 
-        .subtitle {
-            font-size: 1rem;
-            color: var(--muted-foreground);
+        .info-card-icon img {
+            stroke: var(--muted-foreground);
+            transition: filter 0.5s ease;
         }
 
-        h1 {
+        .info-card-content h3 {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            font-weight: 500;
+        }
+
+        .info-card-content p {
+            font-size: 1.5rem;
+            line-height: 2rem;
+            font-weight: 600;
+        }
+
+        .welcome-section {
+            background-color: var(--card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            transition: box-shadow 0.5s ease, transform 0.5s ease, background-color 0.5s ease, color 0.5s ease;
+        }
+
+        .welcome-section h2 {
             font-size: 1.5rem;
             font-weight: 600;
-            color: var(--foreground);
-            margin: 0;
-        }
-
-        .button-container {
-            width: 200px;
-            height: auto;
-            display: flex;
-            align-items: center;
-            justify-content: right;
-            gap: 0.75rem;
-        }
-
-        button {
-            padding: 0.75rem;
-            background-color: var(--primary);
-            color: white;
-            border: var(--border);
-            border-radius: var(--radius);
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: hsl(12 76% 51%);
-        }
-
-        h1, img {
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        footer {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 40px;
-            padding: 0.5rem 2rem;
-            background-color: var(--background);
-            border-top: 1px solid var(--border);
-            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
-            color: var(--foreground);
-            flex-shrink: 0;
-        }
-
-        footer p {
-            margin: 0;
-            font-size: 0.875rem;
-            font-weight: 400;
-            text-align: center;
-        }
-
-        .toolbar-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
             margin-bottom: 1rem;
         }
-         
-        .filter-container {
-            position: relative;
-            display: inline-block;
-        }
 
-        .filter-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            white-space: nowrap;
-            font-weight: 500;
-            font-size: 0.75rem;
-            height: 2rem;
-            padding: 0 0.75rem;
-            border: 1px dashed var(--input);
-            background-color: var(--background);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            border-radius: var(--radius);
-            color: var(--foreground);
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-            cursor: pointer;
-        }
-
-        .filter-button:hover {
-            background-color: var(--accent);
-            color: var(--accent-foreground);
-        }
-
-        .filter-button:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 1px var(--ring);
-        }
-
-        .filter-button:disabled {
-            pointer-events: none;
-            opacity: 0.5;
-        }
-
-        .filter-button img {
-            width: 1rem;
-            height: 1rem;
-            flex-shrink: 0;
-            pointer-events: none;
-        }
-
-        .separator {
-            display: inline-block;
-            width: 1px;
-            height: 1rem;
-            background-color: var(--border);
-            margin: 0 0.5rem;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            background-color: var(--muted);
+        .welcome-section p {
             color: var(--muted-foreground);
-            border-radius: 0.25rem;
-            margin-left: 0.25rem;
+            margin-bottom: 1rem;
         }
 
-        .badge-outline {
-            display: inline-block;
-            width: max-content;
-            white-space: nowrap;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            background-color: transparent;
-            color: var(--foreground);
-            border: 1px solid var(--border);
-            border-radius: 0.25rem;
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .badge-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: start;
-        }
-
-        .mobile-only {
-            display: inline-block;
-        }
-
-        .desktop-badges {
-            display: none;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        @media (min-width: 1024px) {
-            .mobile-only {
-                display: none;
-            }
-            .desktop-badges {
-                display: flex;
-            }
-        }
-
-        .popover-content {
-            position: absolute;
-            top: calc(100% + 0.4rem);
-            left: 0;
-            width: 200px;
-            background-color: var(--popover);
-            color: var(--popover-foreground);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 50;
-            padding: 0;
-            outline: none;
-            animation-duration: 0.2s;
-            animation-fill-mode: forwards;
-        }
-
-        .popover-content[data-state="open"] {
-            animation-name: fade-in, zoom-in;
-        }
-
-        .popover-content[data-state="closed"] {
-            animation-name: fade-out, zoom-out;
-        }
-
-        .popover-content[data-side="bottom"] {
-            animation-name: slide-in-from-top, fade-in, zoom-in;
-        }
-
-        @keyframes fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fade-out {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        @keyframes zoom-in {
-            from { transform: scale(0.95); }
-            to { transform: scale(1); }
-        }
-
-        @keyframes zoom-out {
-            from { transform: scale(1); }
-            to { transform: scale(0.95); }
-        }
-
-        @keyframes slide-in-from-top {
-            from { transform: translateY(-0.5rem); }
-            to { transform: translateY(0); }
-        }
-
-        .command {
-            display: flex;
-            flex-direction: column;
+        .info-boxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
             width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: var(--popover);
-            color: var(--popover-foreground);
+        }
+
+        .info-box {
+            padding: 1rem;
             border-radius: var(--radius);
-        }
-
-        .command-input-wrapper {
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding: 0 0.75rem;
-        }
-
-        .command-input {
-            flex: 1;
-            height: 2.5rem;
-            background-color: transparent;
-            padding: 0.75rem 0;
-            font-size: 0.875rem;
-            outline: none;
-            color: var(--foreground);
-            border: none;
-        }
-
-        .command-input::placeholder {
-            color: var(--muted-foreground);
-        }
-
-        .command-input:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .command-input-wrapper img {
-            width: 1rem;
-            height: 1rem;
-            margin-right: 0.5rem;
-            flex-shrink: 0;
-            opacity: 0.5;
-        }
-
-        .command-list {
-            max-height: 300px;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        .command-group {
-            overflow: hidden;
-            padding: 0.25rem;
-            color: var(--foreground);
-        }
-
-        .command-item {
-            position: relative;
-            display: flex;
-            align-items: center;
-            padding: 0.375rem 0.5rem;
-            font-size: 0.875rem;
-            cursor: default;
-            user-select: none;
-            border-radius: 0.25rem;
-            outline: none;
-        }
-
-        .command-item:hover {
             background-color: var(--accent);
-            color: var(--accent-foreground);
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
-        .command-item[data-selected="true"] {
-            background-color: var(--accent);
-            color: var(--accent-foreground);
-        }
-
-        .command-item[data-disabled="true"] {
-            pointer-events: none;
-            opacity: 0.5;
-        }
-
-        .command-item img {
-            width: 1rem;
-            height: 1rem;
-            flex-shrink: 0;
-            pointer-events: none;
-        }
-
-        .command-separator {
-            height: 1px;
-            background-color: var(--border);
-        }
-
-        .checkbox {
-            width: 1rem;
-            height: 1rem;
-            border: 1px solid var(--primary);
-            border-radius: 0.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 0.5rem;
-            opacity: 0.5;
-        }
-
-        .checkbox.checked {
-            background-color: var(--primary);
-            color: var(--primary-foreground);
-            opacity: 1;
-        }
-
-        .checkbox img {
-            width: 1rem;
-            height: 1rem;
-            visibility: hidden;
-        }
-
-        .checkbox.checked img {
-            visibility: visible;
-        }
-
-        .facet-count {
-            margin-left: auto;
-            width: 1rem;
-            height: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: monospace;
-            font-size: 0.75rem;
-            color: var(--foreground);
-        }
-
-        .command-item.reset {
-            justify-content: center;
-            text-align: center;
-        }
-
-        /* Style pour les inputs */
-        .input {
-            display: flex;
-            width: 100%;
-            height: 2.25rem;
-            border: 1px solid var(--input);
-            border-radius: var(--radius);
-            background-color: transparent;
-            padding: 0.25rem 0.75rem;
-            font-size: 1rem;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            color: var(--foreground);
-        }
-
-        .input::placeholder {
-            color: var(--muted-foreground);
-        }
-
-        .input:focus-visible {
-            outline: none;
-            border-color: var(--ring);
-            box-shadow: 0 0 0 1px var(--ring);
-        }
-
-        .input:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .input[type="file"] {
-            border: none;
-            background-color: transparent;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--foreground);
-        }
-
-        @media (min-width: 768px) {
-            .input {
-                font-size: 0.875rem;
-            }
-        }
-
-        .icon {
-            filter: brightness(0) invert(0); /* Par défaut pour le thème clair */
-            transition: filter 0.3s ease;
-        }
-
-        [data-theme="dark"] .icon {
-            filter: brightness(0) invert(1); /* Inverse les couleurs pour le thème sombre */
-        }
-
-        .search-input {
-            display: flex;
-            width: 100%;
-            max-width: 250px;
-            height: 2rem;
-            border: 1px solid var(--input);
-            border-radius: var(--radius);
-            background-color: var(--background);
-            padding: 0.25rem 0.75rem;
-            font-size: 0.875rem;
-            color: var(--foreground);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .search-input::placeholder {
-            color: var(--muted-foreground);
-            transition: color 0.5s ease;
-        }
-
-        .search-input:focus-visible {
-            outline: none;
-            border-color: var(--ring);
-            box-shadow: 0 0 0 1px var(--ring);
-        }
-
-        .search-input:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .table-wrapper {
-            position: relative;
-            width: 100%;
-            overflow: auto;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .table {
-            width: 100%;
-            text-align: left;
-            font-size: 0.875rem;
-            color: var(--foreground);
-            background-color: var(--background);
-            border-collapse: collapse;
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .table thead tr {
-            border-bottom: 1px solid var(--border);
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .table th {
-            height: 2.5rem;
-            padding: 0 0.5rem;
-            text-align: left;
-            vertical-align: middle;
-            font-weight: 500;
-            color: var(--muted-foreground);
-        }
-
-        .table tr:hover {
-            background-color: var(--muted);
-        }
-
-        .table tbody tr {
-            border-bottom: 1px solid var(--border);
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .table tbody tr:last-child {
-            border-bottom: none;
-        }
-
-        .table td {
-            padding: 0.5rem;
-            vertical-align: middle;
-        }
-
-        .table tr[data-state="selected"] {
-            background-color: var(--muted);
-        }
-
-        .col-profils {
-            width: 18rem;
-        }
-
-        .col-etudiants {
-            width: 12rem;
-        }
-
-        .col-jury {
-            width: 12rem;
-        }
-
-        .col-actions {
-            width: 8rem;
-        }
-
-        .action-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            height: 2rem;
-            width: 2rem;
-            padding: 0;
-            background-color: transparent;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--foreground);
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-            cursor: pointer;
-        }
-
-        .action-button:hover {
-            background-color: var(--muted-foreground);
-        }
-
-        .action-button:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 2px var(--ring);
-        }
-
-        .action-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .action-button .icon {
-            width: 1rem;
-            height: 1rem;
-            pointer-events: none;
-        }
-
-        .action-button[data-state="open"] {
-            background-color: var(--muted-foreground);
-        }
-
-        .dropdown-menu-trigger {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 1rem;
-            background-color: var(--background);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-            width: auto;
-            white-space: nowrap;
-        }
-
-        .dropdown-menu-trigger:hover {
-            background-color: var(--accent);
-            border-color: var(--accent);
-        }
-
-        .dropdown-menu-trigger:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 2px var(--ring);
-        }
-
-        .dropdown-menu-trigger img {
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .dropdown-menu-trigger .user-info {
-            display: flex;
-            flex-direction: column;
-            text-align: left;
-            color: var(--foreground);
-        }
-
-        .dropdown-menu-trigger .user-info .username {
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .dropdown-menu-trigger .user-info .role {
-            font-size: 0.75rem;
-            color: var(--muted-foreground);
-            font-weight: 400;
-        }
-
-        .dropdown-menu-content {
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            right: 2rem;
-            width: auto;
-            background-color: var(--popover);
-            color: var(--popover-foreground);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: none;
-            animation-duration: 0.2s;
-            animation-fill-mode: forwards;
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .dropdown-menu-content[data-state="open"] {
-            display: block;
-            animation-name: fade-in, zoom-in;
-        }
-
-        .dropdown-menu-content[data-state="closed"] {
-            animation-name: fade-out, zoom-out;
-        }
-
-        .dropdown-menu-label {
-            padding: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .dropdown-menu-label img {
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 50%;
-        }
-
-        .dropdown-menu-label .user-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .dropdown-menu-label .username {
-            font-size: 0.875rem;
+        .info-box h3 {
+            font-size: 1.1rem;
             font-weight: 500;
         }
 
-        .dropdown-menu-label .email {
-            font-size: 0.75rem;
-            color: var(--muted-foreground);
-        }
-
-        .dropdown-menu-separator {
-            height: 1px;
-            background-color: var(--border);
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .dropdown-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 0.75rem;
-            margin: 0.25rem;
+        .info-box p {
             font-size: 0.875rem;
-            color: var(--foreground);
-            border-radius: 0.25rem;
-            cursor: pointer;
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+            color: var(--muted-foreground);
+            margin-top: 0.5rem;
         }
 
-        .dropdown-menu-item:hover {
-            background-color: var(--accent);
-            color: var(--accent-foreground);
+        [data-theme="dark"] .info-card {
+            box-shadow: 0 1px 3px 0 rgb(255 255 255 / 0.1), 0 1px 2px -1px rgb(255 255 255 / 0.1);
         }
 
-        .dropdown-menu-item img {
-            width: 1rem;
-            height: 1rem;
-            flex-shrink: 0;
+        [data-theme="dark"] .welcome-section {
+            box-shadow: 0 1px 3px 0 rgb(255 255 255 / 0.1), 0 1px 2px -1px rgb(255 255 255 / 0.1);
         }
 
-        .dropdown-menu-item.theme-toggle .sun-icon {
-            position: absolute;
-            transform: rotate(90deg) scale(0);
-            opacity: 0;
+        [data-theme="dark"] .info-card:hover {
+            box-shadow: 0 10px 15px -3px rgb(255 255 255 / 0.1), 0 4px 6px -4px rgb(255 255 255 / 0.1);
+        }
+
+        [data-theme="dark"] .info-card-icon img {
             filter: brightness(0) invert(1);
         }
 
-        .dropdown-menu-item.theme-toggle .moon-icon {
-            transform: rotate(0deg) scale(1);
-            opacity: 1;
-        }
-
-        [data-theme="dark"] .dropdown-menu-item.theme-toggle .sun-icon {
-            transform: rotate(0deg) scale(1);
-            opacity: 1;
-        }
-
-        [data-theme="dark"] .dropdown-menu-item.theme-toggle .moon-icon {
-            transform: rotate(-90deg) scale(0);
-            opacity: 0;
-        }
-
-        .dropdown-menu-trigger .chevron {
-            width: 1rem;
-            height: 1rem;
-            margin-left: auto;
-            transition: transform 0.2s ease;
-        }
-
-        .dropdown-menu-trigger[aria-expanded="true"] .chevron {
-            transform: rotate(180deg);
-        }
-
-        .dialog {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-        }
-
-        .dialog[data-state="open"] {
-            display: block;
-        }
-
-        .dialog-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-
-        .dialog-content {
-            position: fixed;
+        .dashboard-content {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 50;
-            width: 100%;
-            max-width: 700px;
-            background-color: var(--background);
-            border: 1px solid var(--border);
-            padding: 1.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border-radius: var(--radius);
-            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        .dialog-header {
-            display: flex;
-            flex-direction: column;
-            gap: 0.375rem;
-            text-align: left;
-        }
-
-        .dialog-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            line-height: 1;
-            letter-spacing: -0.025em;
-            color: var(--foreground);
-        }
-
-        .dialog-description {
-            font-size: 0.875rem;
-            color: var(--muted-foreground);
-        }
-
-        .dialog-body {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .dialog-close-icon {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            border-radius: 0.125rem;
-            opacity: 0.7;
-            color: var(--muted-foreground);
-            cursor: pointer;
-            padding: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .dialog-close-icon img {
-            width: 1rem;
-            height: 1rem;
-        }
-
-        .dialog-close-icon:hover {
-            background: none;
-            opacity: 1;
-        }
-
-        .dialog-flex {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .checkbox {
-            margin-right: 0.5rem;
-            accent-color: var(--primary); /* Couleur pour la case cochée */
-        }
-    
-        .form-row-flex {
-            display: flex;
-            gap: 20px;
-        }
-
-        .form-group {
-            flex: 1;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .form-group-wide {
-            flex: 3;
-        }
-
-        .form-group-narrow {
-            flex: 1;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--foreground); /* Texte */
-            margin-bottom: 5px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            color: var(--foreground); /* Texte */
-            background-color: var(--background); /* Fond */
-            border: 1px solid var(--border); /* Bordure */
-            border-radius: var(--radius); /* Coins arrondis */
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
-
-        .form-input:focus {
-            border-color: var(--ring); /* Bordure au focus */
-        }
-
-        .form-select {
-            width: 100%;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            color: var(--foreground); /* Texte */
-            background-color: var(--background); /* Fond */
-            border: 1px solid var(--border); /* Bordure */
-            border-radius: var(--radius); /* Coins arrondis */
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
-
-        .form-select:focus {
-            border-color: var(--ring); /* Bordure au focus */
-        }
-
-        .form-select-tall {
-            height: 120px;
+            gap: 30px;
         }
     </style>
 {% endblock %}
 
 {% block title %}Prism - Tableau de bord{% endblock %}
 
-{% block header %}
-    <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="logo">
-    <h1>Tableau de bord</h1>
-    <div class="button-container">
-        <button class="dropdown-menu-trigger" data-popover-target="dropdown-menu-content" aria-haspopup="dialog" aria-expanded="false" aria-controls="dropdown-menu-content" data-state="closed">
-            <img src="{{ asset('assets/icons/circle-user-round.svg') }}" alt="User Icon" class="icon">
-            <div class="user-info">
-                <span class="username">{{ app.user.prenom }} {{ app.user.nom }}</span>
-                <span class="role">
-                    {% if is_granted('ROLE_ADMIN') %}
-                        Administrateur
-                    {% elseif is_granted('ROLE_USER') %}
-                        Enseignant
-                    {% endif %}
-                </span>
-            </div>
-            <img src="{{ asset('assets/icons/chevrons-up-down.svg') }}" alt="Chevron Icon" class="chevron icon">
-        </button>
-        <div class="dropdown-menu-content" id="dropdown-menu-content" data-state="closed" role="dialog" tabindex="-1">
-            <div class="dropdown-menu-label">
-                <img src="{{ asset('assets/icons/circle-user-round.svg') }}" alt="User Icon" class="icon">
-                <div class="user-info">
-                    <span class="username">{{ app.user.prenom }} {{ app.user.nom }}</span>
-                    <span class="email">{{ app.user.email }}</span>
-                </div>
-            </div>
-            <div class="dropdown-menu-separator"></div>
-            <div class="dropdown-menu-item theme-toggle" id="theme-toggle">
-                <img src="{{ asset('assets/icons/sun.svg') }}" alt="Sun Icon" class="sun-icon icon">
-                <img src="{{ asset('assets/icons/moon.svg') }}" alt="Moon Icon" class="moon-icon icon">
-                <span>Thème</span>
-            </div>
-            <div class="dropdown-menu-item logout-button" id="logout-button" data-form="logout-form">
-                <img src="{{ asset('assets/icons/log-out.svg') }}" alt="Log Out Icon" class="icon">
-                <span>Déconnexion</span>
-            </div>
-        </div>
-        <form id="logout-form" method="post" action="{{ path('app_logout') }}" style="display: none;"></form>
-    </div>
-{% endblock %}
-
 {% block main %}
-    <div class="table-header">
-        <h1 class="title">Liste des entreprises</h1>
-        <p class="subtitle">Voici une liste des entreprises prenant des stagiaires de la section informatique de la Châtaigneraie</p>
-    </div>
-    <div class="table-container">
-        <div class="toolbar-container">
-            <form method="get" action="{{ path('app_dashboard') }}" id="searchForm">
-                <input type="text" name="search" value="{{ search }}" placeholder="Rechercher par raison sociale" id="searchInput" class="search-input">
-            </form>
-            <div class="filter-container" id="filter-container">
-                <!-- Bouton déclencheur -->
-                <button class="filter-button" data-popover-target="popover-content-1" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="popover-content-1" data-state="closed">
-                    <img src="{{ asset('assets/icons/circle-plus.svg') }}" alt="Circle Plus Icon" class="icon"> {{ title }}
-                    {% if selectedValues|length > 0 %}
-                        <span class="separator"></span>
-                        <span class="badge mobile-only">{{ selectedValues|length }}</span>
-                        <div class="desktop-badges">
-                            {% if selectedValues|length > 2 %}
-                                <span class="badge">{{ selectedValues|length }} sélectionnés</span>
-                            {% else %}
-                                {% for option in options|filter(option => option.value in selectedValues) %}
-                                    <span class="badge">{{ option.label }}</span>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </button>
-                <!-- Contenu du popover -->
-                <div class="popover-content" id="popover-content-1" data-state="closed" role="dialog" tabindex="-1">
-                    <div class="command">
-                        <div class="command-input-wrapper">
-                            <img src="{{ asset('assets/icons/search.svg') }}" alt="Search Icon" class="icon">
-                            <input type="text" placeholder="Rechercher..." class="command-input" autocomplete="off" autocorrect="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="command-list" />
-                        </div>
-                        <div class="command-list" role="listbox" aria-label="Suggestions" id="command-list">
-                            <div class="command-group" role="presentation">
-                                {% for option in options %}
-                                    <div class="command-item" role="option" data-value="{{ option.value }}" data-selected="{{ option.value in selectedValues ? 'true' : 'false' }}" data-disabled="false">
-                                        <div class="checkbox {% if option.value in selectedValues %}checked{% endif %}">
-                                            <img src="{{ asset('assets/icons/check.svg') }}" alt="Check Icon" class="icon">
-                                        </div>
-                                        <span>{{ option.label }}</span>
-                                        {% if facets[option.value] is defined %}
-                                            <span class="facet-count">{{ facets[option.value] }}</span>
-                                        {% endif %}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            {% if selectedValues|length > 0 %}
-                                <div class="command-separator"></div>
-                                <div class="command-group">
-                                    <div class="command-item reset" role="option" data-value="reset">Réinitialiser</div>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
+    <div class="welcome-section">
+        <h2>Bienvenue dans PRISM, le système de gestion des entreprises de stages</h2>
+        <p>
+            Ce tableau de bord offre un aperçu de votre système de gestion. Utilisez la navigation pour gérer les entreprises, leurs employés, les étudiants et leurs stages
+        </p>
+        <div class="info-boxes">
+            <div class="info-box">
+                <h3>Entreprises</h3>
+                <p>Gérer les entreprises offrant des stages</p>
             </div>
-        </div> 
-
-        <div class="table-wrapper">
-            {# Vérifie si le tableau des entreprises contient au moins une entrée avant d'afficher le tableau #}
-            {% if entreprises|length > 0 %}
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Raison Sociale</th>
-                            <th scope="col">Adresse</th>
-                            <th scope="col">Tuteur</th>
-                            <th scope="col" class="col-profils">Profils</th>
-                            <th scope="col" class="col-etudiants">Étudiants</th>
-                            <th scope="col" class="col-jury">Jury</th>
-                            {% if is_granted('ROLE_ADMIN') %}
-                                <th scope="col" class="col-actions">Actions</th>
-                            {% endif %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entreprise in entreprises %}
-                            <tr 
-                                data-id="{{ entreprise.id }}"
-                                data-rs="{{ entreprise.rs }}"
-                                data-adresse="{{ entreprise.rue }} {{ entreprise.cp }} {{ entreprise.ville }}"
-                                data-tel="{{ entreprise.tel ?? 'Non spécifié' }}"
-                                data-mail="{{ entreprise.mail ?? 'Non spécifié' }}"
-                                data-tuteurs="{{ entreprise.personnes|map(p => p.id)|join(',') }}"
-                                data-tuteur-names="{{ entreprise.personnes|map(p => p.prenom ~ ' ' ~ p.nom ~ ' (' ~ p.fonction ~ ')' ~ ' ' ~ p.email ~ ' ' ~ p.tel)|join('||') }}"
-                                data-specialite-names="{{ entreprise.specialites|map(s => s.nom)|join('||') }}"
-                                data-etudiant-names="{{ entreprise.stages|map(s => s.etudiant ? s.etudiant.prenom ~ ' ' ~ s.etudiant.nom : '')|filter(name => name)|join('||') }}"
-                                data-jury-names="{{ entreprise.personnes|filter(p => p.profils|filter(profil => profil.nom == 'Jury')|length > 0)|map(p => p.prenom ~ ' ' ~ p.nom)|join('||') }}"
-                            >
-                                <td>{{ entreprise.id }}</td>
-                                <td>{{ entreprise.rs }}</td>
-                                <td>{{ entreprise.rue }} <br>{{ entreprise.cp }} {{ entreprise.ville }}</td>
-                                <td>
-                                    {% if entreprise.personnes|length > 0 %}
-                                        {% for tuteur in entreprise.personnes %}
-                                            {{ tuteur.prenom }} {{ tuteur.nom }} ({{ tuteur.fonction }})<br>
-                                            {{ tuteur.email }}<br>
-                                            {{ tuteur.tel }}
-                                            {% if not loop.last %}<br>{% endif %}
-                                        {% endfor %}
-                                    {% else %}
-                                        Aucun tuteur
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if entreprise.specialites|length > 0 %}
-                                        <div class="badge-container">
-                                            {% for specialite in entreprise.specialites -%}
-                                                <span class="badge-outline">{{ specialite.nom }}</span>
-                                            {%- endfor %}
-                                        </div>
-                                    {% else %}
-                                        Aucune spécialité
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if entreprise.stages|length > 0 %}
-                                        <div class="badge-container">
-                                            {% for stage in entreprise.stages -%}
-                                                {% if stage.etudiant %}
-                                                    <span class="badge-outline">{{ stage.etudiant.prenom }} {{ stage.etudiant.nom }}</span>
-                                                {% endif %}
-                                            {%- endfor %}
-                                        </div>
-                                    {% else %}
-                                        Aucun étudiant
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% set hasJury = false %}
-                                    {% if entreprise.personnes|length > 0 %}
-                                        <div class="badge-container">
-                                            {% for personne in entreprise.personnes %}
-                                                {% if personne.profils|length > 0 %}
-                                                    {% for profil in personne.profils %}
-                                                        {% if profil.nom == 'Jury' %}
-                                                            <span class="badge-outline">{{ personne.prenom }} {{ personne.nom }}</span>
-                                                            {% set hasJury = true %}
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                {% endif %}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                    {% if not hasJury %}
-                                        Aucun jury
-                                    {% endif %}
-                                </td>
-                                {% if is_granted('ROLE_ADMIN') %}
-                                    <td>
-                                        <button class="action-button view-button" data-id="{{ entreprise.id }}">
-                                            <img src="{{ asset('assets/icons/eye.svg') }}" alt="View Icon" class="icon">
-                                        </button>
-                                        <button class="action-button edit-button" data-id="{{ entreprise.id }}">
-                                            <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
-                                        </button>
-                                        <form method="post" action="{{ path('app_entreprise_delete', {'id': entreprise.id}) }}" style="display: inline;">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entreprise.id) }}">
-                                            <button type="submit" class="action-button">
-                                                <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
-                                            </button>
-                                        </form>
-                                    </td>
-                                {% endif %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                {# Dialogue "Voir" générique #}
-                <div id="dialog-view" class="dialog" data-state="closed">
-                    <div class="dialog-overlay"></div>
-                    <div class="dialog-content">
-                        <div class="dialog-header">
-                            <h2 class="dialog-title">Détails de l’entreprise</h2>
-                            <p class="dialog-description">Informations détaillées sur l’entreprise sélectionnée.</p>
-                            <button class="dialog-close-icon">
-                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
-                            </button>
-                        </div>
-                        <div id="dialog-view-body" class="dialog-body">
-                            <p><strong>ID :</strong> <span id="view-id"></span></p>
-                            <p><strong>Raison Sociale :</strong> <span id="view-rs"></span></p>
-                            <p><strong>Adresse :</strong> <span id="view-adresse"></span></p>
-                            <p><strong>Téléphone :</strong> <span id="view-tel"></span></p>
-                            <p><strong>Email :</strong> <span id="view-mail"></span></p>
-                            <p><strong>Tuteur :</strong></p>
-                            <div id="view-tuteurs"></div>
-                            <div class="dialog-flex">
-                                <p><strong>Profils :</strong></p>
-                                <div id="view-profils" class="badge-container"></div>
-                            </div>
-                            <div class="dialog-flex">
-                                <p><strong>Étudiants :</strong></p>
-                                <div id="view-etudiants" class="badge-container"></div>
-                            </div>
-                            <div class="dialog-flex">
-                                <p><strong>Jury :</strong></p>
-                                <div id="view-jury" class="badge-container"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {# Dialogue "Modifier" générique #}
-                <div id="dialog-edit" class="dialog" data-state="closed">
-                    <div class="dialog-overlay"></div>
-                    <div class="dialog-content">
-                        <div class="dialog-header">
-                            <h2 class="dialog-title">Modifier l’entreprise</h2>
-                            <p class="dialog-description">Modifiez les informations de l’entreprise.</p>
-                            <button class="dialog-close-icon">
-                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
-                            </button>
-                        </div>
-                        <div id="dialog-edit-body" class="dialog-body">
-                            <form id="edit-entreprise-form" method="post">
-                                <div class="form-row form-row-flex">
-                                    <div class="form-group form-group-wide">
-                                        <label for="edit-rs" class="form-label">Raison Sociale :</label>
-                                        <input type="text" id="edit-rs" name="rs" class="form-input">
-                                    </div>
-                                    <div class="form-group form-group-narrow">
-                                        <label for="edit-cp" class="form-label">Code Postal :</label>
-                                        <input type="text" id="edit-cp" name="cp" class="form-input">
-                                    </div>
-                                </div>
-                                <div class="form-row form-row-flex">
-                                    <div class="form-group">
-                                        <label for="edit-rue" class="form-label">Rue :</label>
-                                        <input type="text" id="edit-rue" name="rue" class="form-input">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="edit-ville" class="form-label">Ville :</label>
-                                        <input type="text" id="edit-ville" name="ville" class="form-input">
-                                    </div>
-                                </div>
-                                <div class="form-row form-row-flex">
-                                    <div class="form-group form-group-narrow">
-                                        <label for="edit-tel" class="form-label">Téléphone :</label>
-                                        <input type="text" id="edit-tel" name="tel" class="form-input">
-                                    </div>
-                                    <div class="form-group form-group-wide">
-                                        <label for="edit-mail" class="form-label">Email :</label>
-                                        <input type="email" id="edit-mail" name="mail" class="form-input">
-                                    </div>
-                                </div>
-                                {# Tuteurs : Utilisation d'un select multiple #}
-                                <div class="form-group">
-                                    <label for="edit-tuteurs" class="form-label">Tuteurs :</label>
-                                    <select id="edit-tuteurs" name="tuteurs[]" multiple class="form-select form-select-tall">
-                                        {% for personne in allPersonnes %}
-                                            <option value="{{ personne.id }}">{{ personne.prenom }} {{ personne.nom }} ({{ personne.fonction }})</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <button type="submit" class="submit-button">Enregistrer</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            {% else %}
-                <p>Aucune entreprise trouvée</p>
-            {% endif %}
+            <div class="info-box">
+                <h3>Employés</h3>
+                <p>Gérer les employés et tuteurs de stage</p>
+            </div>
+            <div class="info-box">
+                <h3>Étudiants</h3>
+                <p>Gérer les profils des étudiants et leur historique de stages</p>
+            </div>
+            <div class="info-box">
+                <h3>Stages</h3>
+                <p>Suivre et gérer les stages actuels et passés</p>
+            </div>
         </div>
     </div>
-{% endblock %}
-
-{% block javascripts %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const dialogView = document.getElementById('dialog-view');
-            const dialogEdit = document.getElementById('dialog-edit');
-            const editForm = document.getElementById('edit-entreprise-form');
-
-            // Fonction pour ouvrir un dialogue
-            function openDialog(dialog) {
-                closeDialog(); // Ferme tous les dialogues
-                dialog.setAttribute('data-state', 'open');
-            }
-
-            // Fonction pour fermer tous les dialogues
-            function closeDialog() {
-                document.querySelectorAll('.dialog').forEach(dialog => {
-                    dialog.setAttribute('data-state', 'closed');
-                });
-            }
-
-            // Gestion du clic sur le bouton "Fermer" ou l'overlay
-            document.querySelectorAll('.dialog-close-icon, .dialog-overlay').forEach(element => {
-                element.addEventListener('click', closeDialog);
-            });
-
-            // Gestion du clic sur le bouton "Voir"
-            document.querySelectorAll('.action-button.view-button').forEach(button => {
-                button.addEventListener('click', function () {
-                    const id = this.getAttribute('data-id');
-                    const row = document.querySelector(`tr[data-id="${id}"]`);
-                    if (row) {
-                        const rs = row.getAttribute('data-rs');
-                        const adresse = row.getAttribute('data-adresse');
-                        const tel = row.getAttribute('data-tel');
-                        const mail = row.getAttribute('data-mail');
-                        const tuteurNames = row.getAttribute('data-tuteur-names').split('||').filter(name => name);
-                        const specialiteNames = row.getAttribute('data-specialite-names').split('||').filter(name => name);
-                        const etudiantNames = row.getAttribute('data-etudiant-names').split('||').filter(name => name);
-                        const juryNames = row.getAttribute('data-jury-names').split('||').filter(name => name);
-
-                        document.getElementById('view-id').textContent = id;
-                        document.getElementById('view-rs').textContent = rs;
-                        document.getElementById('view-adresse').textContent = adresse;
-                        document.getElementById('view-tel').textContent = tel;
-                        document.getElementById('view-mail').textContent = mail;
-                        document.getElementById('view-tuteurs').innerHTML = tuteurNames.length > 0 ? tuteurNames.join('<br>') : 'Aucun tuteur';
-                        document.getElementById('view-profils').innerHTML = specialiteNames.length > 0 ? specialiteNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucune spécialité';
-                        document.getElementById('view-etudiants').innerHTML = etudiantNames.length > 0 ? etudiantNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucun étudiant';
-                        document.getElementById('view-jury').innerHTML = juryNames.length > 0 ? juryNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucun jury';
-
-                        openDialog(dialogView);
-                    }
-                });
-            });
-
-            // Gestion du clic sur le bouton "Modifier"
-            document.querySelectorAll('.action-button.edit-button').forEach(button => {
-                button.addEventListener('click', function () {
-                    const id = this.getAttribute('data-id');
-                    const row = document.querySelector(`tr[data-id="${id}"]`);
-                    if (row) {
-                        const rs = row.getAttribute('data-rs');
-                        const adresseFull = row.getAttribute('data-adresse');
-                        let rue = '';
-                        let cp = '';
-                        let ville = '';
-                        const adresseMatch = adresseFull.match(/^(.*?)(\d{5})\s+(.+)$/);
-                        if (adresseMatch) {
-                            rue = adresseMatch[1].trim();
-                            cp = adresseMatch[2].trim();
-                            ville = adresseMatch[3].trim();
-                        } else {
-                            rue = adresseFull;
-                        }
-                        const tel = row.getAttribute('data-tel');
-                        const mail = row.getAttribute('data-mail');
-                        const selectedTuteurs = row.getAttribute('data-tuteurs').split(',').filter(id => id);
-
-                        // Remplir les champs texte
-                        document.getElementById('edit-rs').value = rs;
-                        document.getElementById('edit-rue').value = rue;
-                        document.getElementById('edit-cp').value = cp;
-                        document.getElementById('edit-ville').value = ville;
-                        document.getElementById('edit-tel').value = tel;
-                        document.getElementById('edit-mail').value = mail;
-
-                        // Remplir les sélections multiples
-                        const tuteursSelect = document.getElementById('edit-tuteurs');
-                        Array.from(tuteursSelect.options).forEach(option => {
-                            option.selected = selectedTuteurs.includes(option.value);
-                        });
-
-                        // Mettre à jour l'action du formulaire
-                        editForm.action = "{{ path('app_entreprise_edit', {'id': 'placeholder'}) }}".replace('placeholder', id);
-
-                        openDialog(dialogEdit);
-                    }
-                });
-            });
-
-            // Gestion de la recherche
-            const searchForm = document.getElementById('searchForm');
-            const searchInput = document.getElementById('searchInput');
-            let timeout = null;
-
-            if (searchInput) {
-                searchInput.addEventListener('input', function () {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(function () {
-                        searchForm.submit();
-                    }, 1500);
-                });
-            }
-
-            // Gestion du thème
-            const html = document.documentElement;
-            const logo = document.querySelector('header .logo');
-            const themeToggle = document.getElementById('theme-toggle');
-
-            const updateLogo = () => {
-                const currentTheme = html.getAttribute('data-theme');
-                logo.src = currentTheme === 'dark' 
-                    ? "{{ asset('assets/images/logo-dark.png') }}" 
-                    : "{{ asset('assets/images/logo.png') }}";
-            };
-
-            if (localStorage.getItem('theme') === 'dark') {
-                html.setAttribute('data-theme', 'dark');
-            } else {
-                html.setAttribute('data-theme', 'light');
-            }
-            updateLogo();
-
-            if (themeToggle) {
-                themeToggle.addEventListener('click', () => {
-                    const currentTheme = html.getAttribute('data-theme');
-                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                    html.setAttribute('data-theme', newTheme);
-                    localStorage.setItem('theme', newTheme);
-                    updateLogo();
-                });
-            }
-
-            // Gestion des popovers (usernav et filtre)
-            const popovers = document.querySelectorAll('[data-popover-target]');
-            
-            // Réinitialisation de tous les popovers au chargement
-            popovers.forEach(popoverTrigger => {
-                const targetId = popoverTrigger.getAttribute('data-popover-target');
-                const popoverContent = document.getElementById(targetId);
-                if (popoverContent) {
-                    popoverContent.setAttribute('data-state', 'closed');
-                    popoverContent.style.display = 'none';
-                    popoverTrigger.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-            // Gestion du clic sur les déclencheurs de popover
-            popovers.forEach(popoverTrigger => {
-                popoverTrigger.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    const targetId = popoverTrigger.getAttribute('data-popover-target');
-                    const popoverContent = document.getElementById(targetId);
-
-                    if (popoverContent) {
-                        const isOpen = popoverContent.getAttribute('data-state') === 'open';
-                        
-                        // Ferme tous les autres popovers
-                        popovers.forEach(otherTrigger => {
-                            const otherTargetId = otherTrigger.getAttribute('data-popover-target');
-                            const otherContent = document.getElementById(otherTargetId);
-                            if (otherContent && otherTargetId !== targetId) {
-                                otherContent.setAttribute('data-state', 'closed');
-                                otherContent.style.display = 'none';
-                                otherTrigger.setAttribute('aria-expanded', 'false');
-                            }
-                        });
-
-                        // Ouvre ou ferme le popover actuel
-                        popoverContent.setAttribute('data-state', isOpen ? 'closed' : 'open');
-                        popoverContent.style.display = isOpen ? 'none' : 'block';
-                        popoverTrigger.setAttribute('aria-expanded', !isOpen);
-
-                        // Pour le popover de filtre, réinitialiser la recherche
-                        if (targetId === 'popover-content-1' && !isOpen) {
-                            const commandInput = popoverContent.querySelector('.command-input');
-                            if (commandInput) {
-                                commandInput.value = '';
-                                filterOptions('');
-                            }
-                        }
-                    }
-                });
-            });
-
-            // Ferme tous les popovers lorsqu'on clique à l'extérieur
-            document.addEventListener('click', (event) => {
-                popovers.forEach(popoverTrigger => {
-                    const targetId = popoverTrigger.getAttribute('data-popover-target');
-                    const popoverContent = document.getElementById(targetId);
-                    if (popoverContent && !popoverContent.contains(event.target) && !popoverTrigger.contains(event.target)) {
-                        popoverContent.setAttribute('data-state', 'closed');
-                        popoverContent.style.display = 'none';
-                        popoverTrigger.setAttribute('aria-expanded', 'false');
-                    }
-                });
-            });
-
-            // Gestion de la déconnexion
-            const logoutButton = document.getElementById('logout-button');
-            if (logoutButton) {
-                logoutButton.addEventListener('click', () => {
-                    const form = document.getElementById('logout-form');
-                    if (form) {
-                        form.submit();
-                    }
-                });
-            }
-
-            // Gestion du filtre
-            let selectedValues = {{ selectedValues|json_encode|raw }};
-            selectedValues = Array.isArray(selectedValues) ? selectedValues.filter(value => typeof value === 'string' && value.trim() !== '') : [];
-
-            function updateBadges() {
-                const button = document.querySelector('.filter-button');
-                const separator = button.querySelector('.separator');
-                const mobileBadge = button.querySelector('.badge.mobile-only');
-                const desktopBadges = button.querySelector('.desktop-badges');
-
-                if (separator) separator.remove();
-                if (mobileBadge) mobileBadge.remove();
-                if (desktopBadges) desktopBadges.remove();
-
-                if (selectedValues.length > 0) {
-                    const separator = document.createElement('span');
-                    separator.className = 'separator';
-                    button.appendChild(separator);
-
-                    const mobileBadge = document.createElement('span');
-                    mobileBadge.className = 'badge mobile-only';
-                    mobileBadge.textContent = selectedValues.length;
-                    button.appendChild(mobileBadge);
-
-                    const desktopBadges = document.createElement('div');
-                    desktopBadges.className = 'desktop-badges';
-                    if (selectedValues.length > 2) {
-                        const badge = document.createElement('span');
-                        badge.className = 'badge';
-                        badge.textContent = `${selectedValues.length} sélectionnés`;
-                        desktopBadges.appendChild(badge);
-                    } else {
-                        {% for option in options %}
-                            if (selectedValues.includes('{{ option.value }}')) {
-                                const badge = document.createElement('span');
-                                badge.className = 'badge';
-                                badge.textContent = '{{ option.label }}';
-                                desktopBadges.appendChild(badge);
-                            }
-                        {% endfor %}
-                    }
-                    button.appendChild(desktopBadges);
-                }
-            }
-
-            function submitFilters() {
-                const validValues = selectedValues.filter(value => typeof value === 'string' && value.trim() !== '');
-                const form = document.createElement('form');
-                form.method = 'GET';
-                form.action = '{{ path('app_dashboard') }}';
-
-                if (searchInput && searchInput.value) {
-                    const search = document.createElement('input');
-                    search.type = 'hidden';
-                    search.name = 'search';
-                    search.value = searchInput.value;
-                    form.appendChild(search);
-                }
-
-                validValues.forEach(value => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'filters[]';
-                    input.value = value;
-                    form.appendChild(input);
-                });
-
-                document.body.appendChild(form);
-                form.submit();
-            }
-
-            function filterOptions(query) {
-                const commandItems = document.querySelectorAll('.command-item:not(.reset)');
-                const lowerQuery = query.toLowerCase().trim();
-
-                commandItems.forEach(item => {
-                    const label = item.querySelector('span').textContent.toLowerCase();
-                    item.style.display = (lowerQuery === '' || label.includes(lowerQuery)) ? '' : 'none';
-                });
-
-                const resetItem = document.querySelector('.command-item.reset');
-                if (resetItem) {
-                    resetItem.style.display = '';
-                }
-            }
-
-            const commandInput = document.querySelector('.command-input');
-            if (commandInput) {
-                commandInput.addEventListener('input', function () {
-                    filterOptions(this.value);
-                });
-            }
-
-            const commandItems = document.querySelectorAll('.command-item:not(.reset)');
-            commandItems.forEach(item => {
-                item.addEventListener('click', function (event) {
-                    event.stopPropagation();
-                    const value = this.getAttribute('data-value');
-                    const checkbox = this.querySelector('.checkbox');
-
-                    if (selectedValues.includes(value)) {
-                        selectedValues = selectedValues.filter(v => v !== value);
-                        this.setAttribute('data-selected', 'false');
-                        checkbox.classList.remove('checked');
-                    } else {
-                        selectedValues.push(value);
-                        this.setAttribute('data-selected', 'true');
-                        checkbox.classList.add('checked');
-                    }
-
-                    updateBadges();
-                    submitFilters();
-                });
-            });
-
-            const resetItems = document.querySelectorAll('.command-item.reset');
-            resetItems.forEach(item => {
-                item.addEventListener('click', function (event) {
-                    event.stopPropagation();
-                    selectedValues = [];
-                    document.querySelectorAll('.command-item:not(.reset)').forEach(item => {
-                        item.setAttribute('data-selected', 'false');
-                        const checkbox = item.querySelector('.checkbox');
-                        if (checkbox) checkbox.classList.remove('checked');
-                    });
-
-                    const popover = this.closest('.popover-content');
-                    if (popover) {
-                        popover.setAttribute('data-state', 'closed');
-                        popover.style.display = 'none';
-                        const button = document.querySelector(`.filter-button[data-popover-target="${popover.id}"]`);
-                        if (button) {
-                            button.setAttribute('aria-expanded', 'false');
-                        }
-                    }
-
-                    updateBadges();
-                    submitFilters();
-                });
-            });
-        });
-    </script>
+    <div class="dashboard-content">
+        <div class="dashboard-header">
+            <h2 class="title">Tableau de bord</h2>
+            <p class="subtitle">
+                Voici un aperçu des statistiques de votre système de gestion
+            </p>
+        </div>
+        <div class="stats-grid">
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <img src="{{ asset('assets/icons/building-2.svg') }}" alt="Building Icon" class="w-6 h-6">
+                </div>
+                <div class="info-card-content">
+                    <h3>Entreprises</h3>
+                    <p>{{ stats.totalEntreprises|default(0) }}</p>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <img src="{{ asset('assets/icons/graduation-cap.svg') }}" alt="Graduation Cap Icon" class="w-6 h-6">
+                </div>
+                <div class="info-card-content">
+                    <h3>Étudiants</h3>
+                    <p>{{ stats.totalEtudiants|default(0) }}</p>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <img src="{{ asset('assets/icons/calendar-range.svg') }}" alt="Calendar Icon" class="w-6 h-6">
+                </div>
+                <div class="info-card-content">
+                    <h3>Stages</h3>
+                    <p>{{ stats.totalStages|default(0) }}</p>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <img src="{{ asset('assets/icons/users.svg') }}" alt="Users Icon" class="w-6 h-6">
+                </div>
+                <div class="info-card-content">
+                    <h3>Tuteurs</h3>
+                    <p>{{ stats.totalTuteurs|default(0) }}</p>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <img src="{{ asset('assets/icons/clock-3.svg') }}" alt="Clock Icon" class="w-6 h-6">
+                </div>
+                <div class="info-card-content">
+                    <h3>Stages actifs</h3>
+                    <p>{{ stats.activeStages|default(0) }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
