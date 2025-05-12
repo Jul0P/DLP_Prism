@@ -17,7 +17,7 @@ class Stage
 
     #[ORM\ManyToOne(targetEntity: Personne::class, inversedBy: "stages")]
     #[ORM\JoinColumn(name: "PER_ID", referencedColumnName: "PER_ID", nullable: true, onDelete: "SET NULL")]
-    private ?Personne $tuteur = null;
+    private ?Personne $employe = null;
 
     #[ORM\ManyToOne(targetEntity: Entreprise::class, inversedBy: "stages")]
     #[ORM\JoinColumn(name: "ENT_ID", referencedColumnName: "ENT_ID", onDelete: "CASCADE")]
@@ -97,14 +97,14 @@ class Stage
         return $this;
     }
 
-    public function getTuteur(): ?Personne
+    public function getEmploye(): ?Personne
     {
-        return $this->tuteur;
+        return $this->employe;
     }
 
-    public function setTuteur(?Personne $tuteur): self
+    public function setEmploye(?Personne $employe): self
     {
-        $this->tuteur = $tuteur;
+        $this->employe = $employe;
         return $this;
     }
 }

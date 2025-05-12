@@ -1,0 +1,235 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <style>
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .auth-card {
+            background-color: var(--card);
+            color: var(--card-foreground);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .auth-card h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--foreground);
+            text-align: left;
+        }
+
+        .auth-logo img {
+            width: 200px;
+            height: auto;
+            margin-bottom: 1.5rem;
+            background-color: var(--background);
+        }
+
+        .auth-header p {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .auth-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-title img {
+            width: 24px;
+            height: 24px;
+            transition: filter 0.5s ease;
+        }
+
+        [data-theme="dark"] .auth-title img {
+            filter: invert(1);
+            transition: filter 0.5s ease;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background-color: var(--background);
+            color: var(--foreground);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--ring);
+        }
+
+        .form-group input::placeholder {
+            color: var(--muted-foreground);
+        }
+
+        .form-message {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            color: var(--destructive);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: hsl(12 76% 51%);
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 2.8rem;
+            height: 2.8rem;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .theme-toggle img {
+            width: 1.3rem;
+            height: 1.3rem;
+            color: var(--foreground);
+        }
+
+        .theme-toggle .sun-icon {
+            position: absolute;
+            transform: rotate(90deg) scale(0);
+            opacity: 0;
+            filter: brightness(0) invert(1);
+        }
+
+        .theme-toggle .moon-icon {
+            min-width: 1.3rem;
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .theme-toggle .sun-icon {
+            transform: rotate(0deg) scale(1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] .theme-toggle .moon-icon {
+            transform: rotate(-90deg) scale(0);
+            opacity: 0;
+        }
+
+        .auth-card, .form-group input, label, button, h1, a, img {
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .flex {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .w-30 {
+            width: 30%;
+        }
+
+        .w-55 {
+            width: 55%;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--foreground);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <main>
+        {% block main %}{% endblock %}
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleButton = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            const logo = document.querySelector('.auth-logo img');
+
+            const updateLogo = () => {
+                const currentTheme = html.getAttribute('data-theme');
+                if (currentTheme === 'dark') {
+                    logo.src = "{{ asset('assets/icons/logo-dark.png') }}";
+                } else {
+                    logo.src = "{{ asset('assets/icons/logo.png') }}";
+                }
+            };
+
+            if (localStorage.getItem('theme') === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+            } else {
+                html.setAttribute('data-theme', 'light');
+            }
+            updateLogo();
+
+            toggleButton.addEventListener('click', () => {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateLogo();
+            });
+        });
+    </script>
+{% endblock %}

@@ -6,13 +6,33 @@ controllers:
 
 app_dashboard:
     path: /
-    controller: App\Controller\DashboardController::dashboard
+    controller: App\Controller\DashboardController::index
     methods: GET
 
-app_entreprise_delete:
-    path: /entreprise/{id}/delete
-    controller: App\Controller\DashboardController::delete
-    methods: POST
+app_entreprise:
+    path: /entreprise
+    controller: App\Controller\EntrepriseController::index
+    methods: GET
+
+app_employe:
+    path: /employe
+    controller: App\Controller\EmployeController::index
+    methods: GET
+
+app_etudiant:
+    path: /etudiant
+    controller: App\Controller\EtudiantController::index
+    methods: GET
+
+app_stage:
+    path: /stage
+    controller: App\Controller\StageController::index
+    methods: GET
+
+app_admin:
+    path: /admin
+    controller: App\Controller\AdminController::index
+    methods: GET
 
 app_login:
     path: /login

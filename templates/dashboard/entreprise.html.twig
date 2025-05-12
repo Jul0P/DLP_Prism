@@ -1,0 +1,458 @@
+{% extends 'layouts/dashboard.html.twig' %}
+
+{% block title %}Prism - Liste des entreprises{% endblock %}
+
+{% block main %}
+    <div class="table-header">
+        <h2 class="title">Liste des entreprises</h2>
+        <p class="subtitle">Voici une liste des entreprises prenant des stagiaires de la section informatique de la Châtaigneraie</p>
+    </div>
+    <div class="table-container">
+        <div class="toolbar-container">
+            <form method="get" action="{{ path('app_entreprise') }}" id="searchForm">
+                <input type="text" name="search" value="{{ search }}" placeholder="Recherche..." id="searchInput" class="search-input">
+            </form>
+            {% if is_granted('ROLE_ADMIN') %}
+                <button class="add-button">
+                    <img src="{{ asset('assets/icons/plus.svg') }}" alt="Circle Plus Icon" class="icon">
+                    <span>Ajouter une entreprise</span>
+                </button>
+            {% endif %}
+        </div>
+        <div class="table-wrapper">
+            {# Vérifie si le tableau des entreprises contient au moins une entrée avant d'afficher le tableau #}
+            {% if entreprises|length > 0 %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Raison Sociale</th>
+                            <th scope="col">Adresse</th>
+                            <th scope="col">Employés</th>
+                            <th scope="col" class="col-profils">Profils</th>
+                            <th scope="col" class="col-etudiants">Étudiants</th>
+                            <th scope="col" class="col-jury">Jury</th>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <th scope="col" class="col-actions">Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entreprise in entreprises %}
+                            <tr 
+                                data-id="{{ entreprise.id }}"
+                                data-rs="{{ entreprise.rs }}"
+                                data-adresse="{{ entreprise.rue }} {{ entreprise.cp }} {{ entreprise.ville }}"
+                                data-tel="{{ entreprise.tel ?? 'Non spécifié' }}"
+                                data-mail="{{ entreprise.mail ?? 'Non spécifié' }}"
+                                data-employes="{{ entreprise.personnes|map(p => p.id)|join(',') }}"
+                                data-employe-names="{{ entreprise.personnes|map(p => p.prenom ~ ' ' ~ p.nom ~ ' (' ~ p.fonction ~ ')' ~ ' ' ~ p.email ~ ' ' ~ p.tel)|join('||') }}"
+                                data-specialites="{{ entreprise.specialites|map(s => s.id)|json_encode|raw|default('[]') }}"
+                                data-specialite-names="{{ entreprise.specialites|map(s => s.nom)|join('||') }}"
+                                data-etudiant-names="{{ entreprise.stages|map(s => s.etudiant ? s.etudiant.prenom ~ ' ' ~ s.etudiant.nom : '')|filter(name => name)|join('||') }}"
+                                data-jury-names="{{ entreprise.personnes|filter(p => p.profils|filter(profil => profil.nom == 'Jury')|length > 0)|map(p => p.prenom ~ ' ' ~ p.nom)|join('||') }}"
+                                data-pays-id="{{ entreprise.pays ? entreprise.pays.id : '' }}"
+                            >
+                                <td>{{ entreprise.id }}</td>
+                                <td>{{ entreprise.rs }}</td>
+                                <td>{{ entreprise.rue }} <br>{{ entreprise.cp }} {{ entreprise.ville }}</td>
+                                <td>
+                                    {% if entreprise.personnes|length > 0 %}
+                                        {% for employe in entreprise.personnes %}
+                                            {{ employe.prenom }} {{ employe.nom }} ({{ employe.fonction }})<br>
+                                            {{ employe.email }}<br>
+                                            {{ employe.tel }}
+                                            {% if not loop.last %}<br>{% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        Aucun employé
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entreprise.specialites|length > 0 %}
+                                        <div class="badge-container">
+                                            {% for specialite in entreprise.specialites -%}
+                                                <span class="badge-outline">{{ specialite.nom }}</span>
+                                            {%- endfor %}
+                                        </div>
+                                    {% else %}
+                                        Aucune spécialité
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entreprise.stages|length > 0 %}
+                                        <div class="badge-container">
+                                            {% for stage in entreprise.stages -%}
+                                                {% if stage.etudiant %}
+                                                    <span class="badge-outline">{{ stage.etudiant.prenom }} {{ stage.etudiant.nom }}</span>
+                                                {% endif %}
+                                            {%- endfor %}
+                                        </div>
+                                    {% else %}
+                                        Aucun étudiant
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set hasJury = false %}
+                                    {% if entreprise.personnes|length > 0 %}
+                                        <div class="badge-container">
+                                            {% for personne in entreprise.personnes %}
+                                                {% if personne.profils|length > 0 %}
+                                                    {% for profil in personne.profils %}
+                                                        {% if profil.nom == 'Jury' %}
+                                                            <span class="badge-outline">{{ personne.prenom }} {{ personne.nom }}</span>
+                                                            {% set hasJury = true %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    {% if not hasJury %}
+                                        Aucun jury
+                                    {% endif %}
+                                </td>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <td>
+                                        <button class="action-button view-button" data-id="{{ entreprise.id }}">
+                                            <img src="{{ asset('assets/icons/eye.svg') }}" alt="View Icon" class="icon">
+                                        </button>
+                                        <button class="action-button edit-button" data-id="{{ entreprise.id }}">
+                                            <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
+                                        </button>
+                                        <form method="post" action="{{ path('app_entreprise_delete', {'id': entreprise.id}) }}" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entreprise.id) }}">
+                                            <button type="submit" class="action-button">
+                                                <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
+                                            </button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {# Dialogue "Voir" générique #}
+                <div id="dialog-view" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Détails de l’entreprise</h2>
+                            <p class="dialog-description">Informations détaillées sur l’entreprise sélectionnée</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div id="dialog-view-body" class="dialog-body">
+                            <p><strong>ID :</strong> <span id="view-id"></span></p>
+                            <p><strong>Raison Sociale :</strong> <span id="view-rs"></span></p>
+                            <p><strong>Adresse :</strong> <span id="view-adresse"></span></p>
+                            <p><strong>Téléphone :</strong> <span id="view-tel"></span></p>
+                            <p><strong>Email :</strong> <span id="view-mail"></span></p>
+                            <p><strong>Employés :</strong></p>
+                            <div id="view-employes"></div>
+                            <div class="dialog-flex">
+                                <p><strong>Profils :</strong></p>
+                                <div id="view-profils" class="badge-container"></div>
+                            </div>
+                            <div class="dialog-flex">
+                                <p><strong>Étudiants :</strong></p>
+                                <div id="view-etudiants" class="badge-container"></div>
+                            </div>
+                            <div class="dialog-flex">
+                                <p><strong>Jury :</strong></p>
+                                <div id="view-jury" class="badge-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Dialogue "Modifier" générique #}
+                <div id="dialog-edit" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Modifier l’entreprise</h2>
+                            <p class="dialog-description">Modifiez les informations de l’entreprise</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div id="dialog-edit-body" class="dialog-body">
+                            <form id="edit-entreprise-form" method="post">
+                                <div class="form-group form-group-wide">
+                                    <label for="edit-rs" class="form-label">Raison Sociale :</label>
+                                    <input type="text" id="edit-rs" name="rs" class="form-input">
+                                </div>
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group">
+                                        <label for="edit-rue" class="form-label">Rue :</label>
+                                        <input type="text" id="edit-rue" name="rue" class="form-input">
+                                    </div>
+                                    <div class="form-group form-group-narrow">
+                                        <label for="edit-cp" class="form-label">Code Postal :</label>
+                                        <input type="text" id="edit-cp" name="cp" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group">
+                                        <label for="edit-ville" class="form-label">Ville :</label>
+                                        <input type="text" id="edit-ville" name="ville" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-pays" class="form-label">Pays :</label>
+                                        <select id="edit-pays" name="pays" class="form-select">
+                                            {% for pays in allPays %}
+                                                <option value="{{ pays.id }}">{{ pays.nom }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group form-group-wide">
+                                        <label for="edit-mail" class="form-label">Email :</label>
+                                        <input type="email" id="edit-mail" name="mail" class="form-input">
+                                    </div>
+                                    <div class="form-group form-group-narrow">
+                                        <label for="edit-tel" class="form-label">Téléphone :</label>
+                                        <input type="text" id="edit-tel" name="tel" class="form-input">
+                                    </div>
+                                </div>
+                                {# Employés : Utilisation d'un select multiple #}
+                                <div class="form-group">
+                                    <label for="edit-employes" class="form-label">Employés :</label>
+                                    <select id="edit-employes" name="employes[]" multiple class="form-select form-select-tall">
+                                        {% for personne in allPersonnes %}
+                                            <option value="{{ personne.id }}">{{ personne.prenom }} {{ personne.nom }} ({{ personne.fonction }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {# Profils : Cases à cocher (inchangé) #}
+                                <div class="form-group">
+                                    <label class="form-label">Profils :</label>
+                                    <div id="edit-profils" class="checkbox-group-inline">
+                                        <div class="checkbox-row">
+                                            {% for specialite in allSpecialites %}
+                                                <div class="checkbox-item-inline">
+                                                    <input type="checkbox" name="profils[{{ loop.index }}]" value="{{ specialite.id }}" class="form-checkbox">
+                                                    <label class="checkbox-label">{{ specialite.nom }}</label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="submit-button">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {# Dialogue "Ajouter" générique #}
+                <div id="dialog-add" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Ajouter une entreprise</h2>
+                            <p class="dialog-description">Ajoutez une nouvelle entreprise</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div id="dialog-add-body" class="dialog-body">
+                            <form id="add-entreprise-form" method="post">
+                                <div class="form-group form-group-wide">
+                                    <label for="add-rs" class="form-label">Raison Sociale :</label>
+                                    <input type="text" id="add-rs" name="rs" class="form-input">
+                                </div>
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group">
+                                        <label for="add-rue" class="form-label">Rue :</label>
+                                        <input type="text" id="add-rue" name="rue" class="form-input">
+                                    </div>
+                                    <div class="form-group form-group-narrow">
+                                        <label for="add-cp" class="form-label">Code Postal :</label>
+                                        <input type="text" id="add-cp" name="cp" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group">
+                                        <label for="add-ville" class="form-label">Ville :</label>
+                                        <input type="text" id="add-ville" name="ville" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="add-pays" class="form-label">Pays :</label>
+                                        <select id="add-pays" name="pays" class="form-select">
+                                            {% for pays in allPays %}
+                                                <option value="{{ pays.id }}">{{ pays.nom }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group form-group-wide">
+                                        <label for="add-mail" class="form-label">Email :</label>
+                                        <input type="email" id="add-mail" name="mail" class="form-input">
+                                    </div>
+                                    <div class="form-group form-group-narrow">
+                                        <label for="add-tel" class="form-label">Téléphone :</label>
+                                        <input type="text" id="add-tel" name="tel" class="form-input">
+                                    </div>
+                                </div>
+                                {# Employés : Utilisation d'un select multiple #}
+                                <div class="form-group">
+                                    <label for="add-employes" class="form-label">Employés :</label>
+                                    <select id="add-employes" name="employes[]" multiple class="form-select form-select-tall">
+                                        {% for personne in allPersonnes %}
+                                            <option value="{{ personne.id }}">{{ personne.prenom }} {{ personne.nom }} ({{ personne.fonction }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {# Profils : Cases à cocher (inchangé) #}
+                                <div class="form-group">
+                                    <label class="form-label">Profils :</label>
+                                    <div id="add-profils" class="checkbox-group-inline">
+                                        <div class="checkbox-row">
+                                            {% for specialite in allSpecialites %}
+                                                <div class="checkbox-item-inline">
+                                                    <input type="checkbox" name="profils[{{ loop.index }}]" value="{{ specialite.id }}" class="form-checkbox">
+                                                    <label class="checkbox-label">{{ specialite.nom }}</label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="submit-button">Ajouter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p>Aucune entreprise trouvée</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dialogView = document.getElementById('dialog-view');
+            const dialogEdit = document.getElementById('dialog-edit');
+            const editForm = document.getElementById('edit-entreprise-form');
+
+            // Fonction pour ouvrir un dialogue
+            function openDialog(dialog) {
+                closeDialog(); // Ferme tous les dialogues
+                dialog.setAttribute('data-state', 'open');
+            }
+
+            // Fonction pour fermer tous les dialogues
+            function closeDialog() {
+                document.querySelectorAll('.dialog').forEach(dialog => {
+                    dialog.setAttribute('data-state', 'closed');
+                });
+            }
+
+            // Gestion du clic sur le bouton "Fermer" ou l'overlay
+            document.querySelectorAll('.dialog-close-icon, .dialog-overlay').forEach(element => {
+                element.addEventListener('click', closeDialog);
+            });
+
+            // Gestion du clic sur le bouton "Voir"
+            document.querySelectorAll('.action-button.view-button').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) {
+                        const rs = row.getAttribute('data-rs');
+                        const adresse = row.getAttribute('data-adresse');
+                        const tel = row.getAttribute('data-tel');
+                        const mail = row.getAttribute('data-mail');
+                        const employeNames = row.getAttribute('data-employe-names').split('||').filter(name => name);
+                        const specialiteNames = row.getAttribute('data-specialite-names').split('||').filter(name => name);
+                        const etudiantNames = row.getAttribute('data-etudiant-names').split('||').filter(name => name);
+                        const juryNames = row.getAttribute('data-jury-names').split('||').filter(name => name);
+
+                        document.getElementById('view-id').textContent = id;
+                        document.getElementById('view-rs').textContent = rs;
+                        document.getElementById('view-adresse').textContent = adresse;
+                        document.getElementById('view-tel').textContent = tel;
+                        document.getElementById('view-mail').textContent = mail;
+                        document.getElementById('view-employes').innerHTML = employeNames.length > 0 ? employeNames.join('<br>') : 'Aucun employe';
+                        document.getElementById('view-profils').innerHTML = specialiteNames.length > 0 ? specialiteNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucune spécialité';
+                        document.getElementById('view-etudiants').innerHTML = etudiantNames.length > 0 ? etudiantNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucun étudiant';
+                        document.getElementById('view-jury').innerHTML = juryNames.length > 0 ? juryNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucun jury';
+
+                        openDialog(dialogView);
+                    }
+                });
+            });
+
+            // Gestion du clic sur le bouton "Modifier"
+            document.querySelectorAll('.action-button.edit-button').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) {
+                        const rs = row.getAttribute('data-rs');
+                        const adresseFull = row.getAttribute('data-adresse');
+                        let rue = '';
+                        let cp = '';
+                        let ville = '';
+                        const adresseMatch = adresseFull.match(/^(.*?)(\d{5})\s+(.+)$/);
+                        if (adresseMatch) {
+                            rue = adresseMatch[1].trim();
+                            cp = adresseMatch[2].trim();
+                            ville = adresseMatch[3].trim();
+                        } else {
+                            rue = adresseFull;
+                        }
+                        const tel = row.getAttribute('data-tel');
+                        const mail = row.getAttribute('data-mail');
+                        const selectedemployes = row.getAttribute('data-employes').split(',').filter(id => id);
+                        const selectedSpecialites = JSON.parse(row.getAttribute('data-specialites') || '[]');
+                        const paysId = row.getAttribute('data-pays-id') || '';
+
+                        // Remplir les champs texte
+                        document.getElementById('edit-rs').value = rs;
+                        document.getElementById('edit-rue').value = rue;
+                        document.getElementById('edit-cp').value = cp;
+                        document.getElementById('edit-ville').value = ville;
+                        document.getElementById('edit-tel').value = tel;
+                        document.getElementById('edit-mail').value = mail;
+                        document.getElementById('edit-pays').value = paysId;
+
+                        // Remplir les sélections multiples
+                        const employesSelect = document.getElementById('edit-employes');
+                        Array.from(employesSelect.options).forEach(option => {
+                            option.selected = selectedemployes.includes(option.value);
+                        });
+
+                        // Sélectionner les profils (cases à cocher)
+                        const profilCheckboxes = document.querySelectorAll('#edit-profils input[type="checkbox"]');
+                        profilCheckboxes.forEach(checkbox => {
+                            checkbox.checked = selectedSpecialites.includes(parseInt(checkbox.value));
+                        });
+
+                        // Mettre à jour l'action du formulaire
+                        editForm.action = "{{ path('app_entreprise_edit', {'id': 'placeholder'}) }}".replace('placeholder', id);
+
+                        openDialog(dialogEdit);
+                    }
+                });
+            });
+
+            // Gestion du clic sur le bouton "Ajouter"
+            document.querySelector('.add-button').addEventListener('click', function () {
+                // Réinitialiser le formulaire d'ajout
+                document.getElementById('add-entreprise-form').reset();
+                // Mettre à jour l'action du formulaire
+                const addForm = document.getElementById('add-entreprise-form');
+                addForm.action = "{{ path('app_entreprise_create') }}";
+                openDialog(document.getElementById('dialog-add'));
+            });
+        });
+    </script>
+{% endblock %}

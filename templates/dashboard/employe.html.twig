@@ -1,0 +1,331 @@
+{% extends 'layouts/dashboard.html.twig' %}
+
+{% block title %}Prism - Liste des employés{% endblock %}
+
+{% block main %}
+    <div class="table-header">
+        <h2 class="title">Liste des employés</h2>
+        <p class="subtitle">Voici une liste des employés des entreprises partenaires</p>
+    </div>
+    <div class="table-container">
+        <div class="toolbar-container">
+            <form method="get" action="{{ path('app_employe') }}" id="searchForm">
+                <input type="text" name="search" value="{{ search }}" placeholder="Recherche..." id="searchInput" class="search-input">
+            </form>
+            {% if is_granted('ROLE_ADMIN') %}
+                <button class="add-button">
+                    <img src="{{ asset('assets/icons/plus.svg') }}" alt="Circle Plus Icon" class="icon">
+                    <span>Ajouter un employé</span>
+                </button>
+            {% endif %}
+        </div>
+        <div class="table-wrapper">
+            {% if employes|length > 0 %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nom</th>
+                            <th scope="col">Prénom</th>
+                            <th scope="col">Fonction</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Téléphone</th>
+                            <th scope="col">Entreprise</th>
+                            <th scope="col">Profils</th>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <th scope="col" class="col-actions">Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for employe in employes %}
+                            <tr data-id="{{ employe.id }}"
+                                data-nom="{{ employe.nom }}"
+                                data-prenom="{{ employe.prenom }}"
+                                data-fonction="{{ employe.fonction }}"
+                                data-email="{{ employe.email }}"
+                                data-tel="{{ employe.tel }}"
+                                data-entreprise-id="{{ employe.entreprise ? employe.entreprise.id : '' }}"
+                                data-entreprise-nom="{{ employe.entreprise ? employe.entreprise.rs : 'Aucune' }}"
+                                data-profil="{{ employe.profils|map(s => s.id)|json_encode|raw|default('[]') }}"
+                                data-profil-names="{{ employe.profils|map(s => s.nom)|join('||') }}">
+                                <td>{{ employe.id }}</td>
+                                <td>{{ employe.nom }}</td>
+                                <td>{{ employe.prenom }}</td>
+                                <td>{{ employe.fonction }}</td>
+                                <td>{{ employe.email }}</td>
+                                <td>{{ employe.tel }}</td>
+                                <td>{{ employe.entreprise ? employe.entreprise.rs : 'Aucune' }}</td>
+                                <td>
+                                    {% if employe.profils is not empty %}
+                                        <div class="badge-container">
+                                            {% for profil in employe.profils -%}
+                                                <span class="badge-outline">{{ profil.nom }}</span>
+                                            {%- endfor %}
+                                        </div>
+                                    {% else %}
+                                        Aucun profil
+                                    {% endif %}
+                                </td>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <td>
+                                        <button class="action-button view-button" data-id="{{ employe.id }}">
+                                            <img src="{{ asset('assets/icons/eye.svg') }}" alt="View Icon" class="icon">
+                                        </button>
+                                        <button class="action-button edit-button" data-id="{{ employe.id }}">
+                                            <img src="{{ asset('assets/icons/pencil.svg') }}" alt="Edit Icon" class="icon">
+                                        </button>
+                                        <form method="post" action="{{ path('app_employe_delete', {'id': employe.id}) }}" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ employe.id) }}">
+                                            <button type="submit" class="action-button">
+                                                <img src="{{ asset('assets/icons/trash-2.svg') }}" alt="Delete Icon" class="icon">
+                                            </button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Dialogue Voir -->
+                <div id="dialog-view" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Détails de l’employé</h2>
+                            <p class="dialog-description">Informations détaillées sur l’employé sélectionné</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div id="dialog-view-body" class="dialog-body">
+                            <p><strong>ID :</strong> <span id="view-id"></span></p>
+                            <p><strong>Nom :</strong> <span id="view-nom"></span></p>
+                            <p><strong>Prénom :</strong> <span id="view-prenom"></span></p>
+                            <p><strong>Fonction :</strong> <span id="view-fonction"></span></p>
+                            <p><strong>Email :</strong> <span id="view-email"></span></p>
+                            <p><strong>Téléphone :</strong> <span id="view-tel"></span></p>
+                            <p><strong>Entreprise :</strong> <span id="view-entreprise"></span></p>
+                            <div class="dialog-flex">
+                                <p><strong>Profils :</strong></p>
+                                <div id="view-profils" class="badge-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialogue Modifier -->
+                <div id="dialog-edit" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Modifier l’employé</h2>
+                            <p class="dialog-description">Modifiez les informations de l’employé</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div class="dialog-body">
+                            <form id="edit-employe-form" method="post">
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group">
+                                        <label for="edit-nom" class="form-label">Nom :</label>
+                                        <input type="text" id="edit-nom" name="nom" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="edit-prenom" class="form-label">Prénom :</label>
+                                        <input type="text" id="edit-prenom" name="prenom" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-fonction" class="form-label">Fonction :</label>
+                                    <input type="text" id="edit-fonction" name="fonction" class="form-input">
+                                </div>
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group form-group-wide">
+                                        <label for="edit-email" class="form-label">Email :</label>
+                                        <input type="email" id="edit-email" name="email" class="form-input">
+                                    </div>
+                                    <div class="form-group form-group-narrow">
+                                        <label for="edit-tel" class="form-label">Téléphone :</label>
+                                        <input type="text" id="edit-tel" name="tel" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit-entreprise" class="form-label">Entreprise :</label>
+                                    <select id="edit-entreprise" name="entreprise" class="form-select">
+                                        <option value="">Aucune</option>
+                                        {% for entreprise in allEntreprises %}
+                                            <option value="{{ entreprise.id }}">{{ entreprise.rs }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {# Profils : Cases à cocher (inchangé) #}
+                                <div class="form-group">
+                                    <label class="form-label">Profils :</label>
+                                    <div id="edit-profils" class="checkbox-group-inline">
+                                        <div class="checkbox-row">
+                                            {% for profil in allProfils %}
+                                                <div class="checkbox-item-inline">
+                                                    <input type="checkbox" name="profils[{{ loop.index }}]" value="{{ profil.id }}" class="form-checkbox">
+                                                    <label class="checkbox-label">{{ profil.nom }}</label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="submit-button">Enregistrer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dialogue Ajouter -->
+                <div id="dialog-add" class="dialog" data-state="closed">
+                    <div class="dialog-overlay"></div>
+                    <div class="dialog-content">
+                        <div class="dialog-header">
+                            <h2 class="dialog-title">Ajouter un employé</h2>
+                            <p class="dialog-description">Ajoutez une nouvelle entreprise</p>
+                            <button class="dialog-close-icon">
+                                <img src="{{ asset('assets/icons/x.svg') }}" alt="Close Icon" class="icon">
+                            </button>
+                        </div>
+                        <div class="dialog-body">
+                            <form id="add-employe-form" method="post" action="{{ path('app_employe_create') }}">
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group">
+                                        <label for="add-nom" class="form-label">Nom :</label>
+                                        <input type="text" id="add-nom" name="nom" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="add-prenom" class="form-label">Prénom :</label>
+                                        <input type="text" id="add-prenom" name="prenom" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-fonction" class="form-label">Fonction :</label>
+                                    <input type="text" id="add-fonction" name="fonction" class="form-input">
+                                </div>
+                                <div class="form-row form-row-flex">
+                                    <div class="form-group form-group-wide">
+                                        <label for="add-email" class="form-label">Email :</label>
+                                        <input type="email" id="add-email" name="email" class="form-input">
+                                    </div>
+                                    <div class="form-group form-group-narrow">
+                                        <label for="add-tel" class="form-label">Téléphone :</label>
+                                        <input type="text" id="add-tel" name="tel" class="form-input">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-entreprise" class="form-label">Entreprise :</label>
+                                    <select id="add-entreprise" name="entreprise" class="form-select">
+                                        <option value="">Aucune</option>
+                                        {% for entreprise in allEntreprises %}
+                                            <option value="{{ entreprise.id }}">{{ entreprise.rs }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {# Profils : Cases à cocher (inchangé) #}
+                                <div class="form-group">
+                                    <label class="form-label">Profils :</label>
+                                    <div id="add-profils" class="checkbox-group-inline">
+                                        <div class="checkbox-row">
+                                            {% for profil in allProfils %}
+                                                <div class="checkbox-item-inline">
+                                                    <input type="checkbox" name="profils[{{ loop.index }}]" value="{{ profil.id }}" class="form-checkbox">
+                                                    <label class="checkbox-label">{{ profil.nom }}</label>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="submit-button">Ajouter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p>Aucun employé trouvé</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dialogView = document.getElementById('dialog-view');
+            const dialogEdit = document.getElementById('dialog-edit');
+            const dialogAdd = document.getElementById('dialog-add');
+            const editForm = document.getElementById('edit-employe-form');
+
+            function openDialog(dialog) {
+                document.querySelectorAll('.dialog').forEach(d => d.setAttribute('data-state', 'closed'));
+                dialog.setAttribute('data-state', 'open');
+            }
+
+            function closeDialog() {
+                document.querySelectorAll('.dialog').forEach(d => d.setAttribute('data-state', 'closed'));
+            }
+
+            document.querySelectorAll('.dialog-close-icon, .dialog-overlay').forEach(el => {
+                el.addEventListener('click', closeDialog);
+            });
+
+            // Gestion du clic sur le bouton "Voir"
+            document.querySelectorAll('.view-button').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) {
+                        profilNames = row.getAttribute('data-profil-names').split('||').filter(name => name);
+
+                        document.getElementById('view-id').textContent = id;
+                        document.getElementById('view-nom').textContent = row.getAttribute('data-nom');
+                        document.getElementById('view-prenom').textContent = row.getAttribute('data-prenom');
+                        document.getElementById('view-fonction').textContent = row.getAttribute('data-fonction') || 'Non spécifié';
+                        document.getElementById('view-email').textContent = row.getAttribute('data-email') || 'Non spécifié';
+                        document.getElementById('view-tel').textContent = row.getAttribute('data-tel') || 'Non spécifié';
+                        document.getElementById('view-entreprise').textContent = row.getAttribute('data-entreprise-nom');
+                        document.getElementById('view-profils').innerHTML = profilNames.length > 0 ? profilNames.map(name => `<span class="badge-outline">${name}</span>`).join('') : 'Aucun profil';
+                        openDialog(dialogView);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.edit-button').forEach(button => {
+                button.addEventListener('click', function () {
+                    const id = this.getAttribute('data-id');
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    if (row) {
+                        const selectedProfils = JSON.parse(row.getAttribute('data-profil') || '[]');
+
+                        document.getElementById('edit-nom').value = row.getAttribute('data-nom');
+                        document.getElementById('edit-prenom').value = row.getAttribute('data-prenom');
+                        document.getElementById('edit-fonction').value = row.getAttribute('data-fonction');
+                        document.getElementById('edit-email').value = row.getAttribute('data-email');
+                        document.getElementById('edit-tel').value = row.getAttribute('data-tel');
+                        document.getElementById('edit-entreprise').value = row.getAttribute('data-entreprise-id');
+
+                        // Sélectionner les profils (cases à cocher)
+                        const profilCheckboxes = document.querySelectorAll('#edit-profils input[type="checkbox"]');
+                        profilCheckboxes.forEach(checkbox => {
+                            checkbox.checked = selectedProfils.includes(parseInt(checkbox.value));
+                        });
+
+                        editForm.action = "{{ path('app_employe_edit', {'id': 'placeholder'}) }}".replace('placeholder', id);
+                        openDialog(dialogEdit);
+                    }
+                });
+            });
+
+            document.querySelector('.add-button').addEventListener('click', function () {
+                document.getElementById('add-employe-form').reset();
+                openDialog(dialogAdd);
+            });
+        });
+    </script>
+{% endblock %}
