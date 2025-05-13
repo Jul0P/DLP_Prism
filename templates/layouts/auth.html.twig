@@ -28,11 +28,16 @@
             text-align: left;
         }
 
-        .auth-logo img {
+        .logo {
             width: 200px;
             height: auto;
             margin-bottom: 1.5rem;
             background-color: var(--background);
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, opacity 0.5s ease, filter 0.5s ease;
+        }
+
+        .logo.hidden {
+            opacity: 0;
         }
 
         .auth-header p {
@@ -205,15 +210,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             const toggleButton = document.getElementById('theme-toggle');
             const html = document.documentElement;
-            const logo = document.querySelector('.auth-logo img');
+            const logo = document.querySelector('.logo');
 
             const updateLogo = () => {
                 const currentTheme = html.getAttribute('data-theme');
-                if (currentTheme === 'dark') {
-                    logo.src = "{{ asset('assets/icons/logo-dark.png') }}";
-                } else {
-                    logo.src = "{{ asset('assets/icons/logo.png') }}";
-                }
+                logo.classList.add('hidden');
+
+                setTimeout(() => {
+                    logo.src = currentTheme === 'dark' 
+                        ? "{{ asset('assets/icons/logo-dark.png') }}" 
+                        : "{{ asset('assets/icons/logo.png') }}";
+
+                    logo.onload = () => logo.classList.remove('hidden');
+                }, 150);
             };
 
             if (localStorage.getItem('theme') === 'dark') {

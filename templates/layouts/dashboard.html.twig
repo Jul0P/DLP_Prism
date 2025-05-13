@@ -193,6 +193,10 @@
             transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, opacity 0.5s ease, filter 0.5s ease;
         }
 
+        .logo.hidden {
+            opacity: 0;
+        }
+
         h1 {
             font-size: 1.8rem;
             font-weight: bold;
@@ -1101,9 +1105,15 @@
 
             const updateLogo = () => {
                 const currentTheme = html.getAttribute('data-theme');
-                logo.src = currentTheme === 'dark' 
-                    ? "{{ asset('assets/images/logo-dark.png') }}" 
-                    : "{{ asset('assets/images/logo.png') }}";
+                logo.classList.add('hidden');
+
+                setTimeout(() => {
+                    logo.src = currentTheme === 'dark' 
+                        ? "{{ asset('assets/images/logo-dark.png') }}" 
+                        : "{{ asset('assets/images/logo.png') }}";
+
+                    logo.onload = () => logo.classList.remove('hidden');
+                }, 150);
             };
 
             if (localStorage.getItem('theme') === 'dark') {
