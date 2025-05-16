@@ -20,19 +20,7 @@ class EtudiantController extends AbstractController
 
         // Si un terme de recherche est fourni, filtrer les étudiants
         if ($search) {
-            $etudiants = $etudiantRepository->createQueryBuilder('et')
-                ->leftJoin('et.stages', 'st')
-                ->leftJoin('st.entreprise', 'e')
-                ->where('et.id LIKE :search')
-                ->orWhere('et.nom LIKE :search')
-                ->orWhere('et.prenom LIKE :search')
-                ->orWhere('et.email LIKE :search')
-                ->orWhere('et.tel LIKE :search')
-                ->orWhere('e.rs LIKE :search')
-                ->setParameter('search', '%' . $search . '%')
-                ->distinct()
-                ->getQuery()
-                ->getResult();
+            $etudiants = $etudiantRepository->findBySearch($search);
         } else {
             // Sinon, récupérer tous les étudiants
             $etudiants = $etudiantRepository->findAll();

@@ -20,31 +20,11 @@ class DashboardController extends AbstractController
         PersonneRepository $personneRepository
     ): Response {
         $stats = [
-            'totalEntreprises' => $entrepriseRepository->createQueryBuilder('e')
-                ->select('COUNT(e.id)')
-                ->getQuery()
-                ->getSingleScalarResult(),
-            'totalEtudiants' => $etudiantRepository->createQueryBuilder('et')
-                ->select('COUNT(et.id)')
-                ->getQuery()
-                ->getSingleScalarResult(),
-            'totalStages' => $stageRepository->createQueryBuilder('st')
-                ->select('COUNT(st.id)')
-                ->getQuery()
-                ->getSingleScalarResult(),
-            'totalTuteurs' => $personneRepository->createQueryBuilder('p')
-                ->leftJoin('p.profils', 'pr')
-                ->where('pr.nom = :tuteur')
-                ->setParameter('tuteur', 'Tuteur')
-                ->select('COUNT(DISTINCT p.id)')
-                ->getQuery()
-                ->getSingleScalarResult(),
-            'activeStages' => $stageRepository->createQueryBuilder('st')
-                ->where('st.dateFin >= :today AND st.dateDebut <= :today')
-                ->setParameter('today', new \DateTime())
-                ->select('COUNT(st.id)')
-                ->getQuery()
-                ->getSingleScalarResult(),
+            'totalEntreprises' => $entrepriseRepository->countAll(),
+            'totalEtudiants' => $etudiantRepository->countAll(),
+            'totalStages' => $stageRepository->countAll(),
+            'totalTuteurs' => $personneRepository->countTuteurs(),
+            'activeStages' => $stageRepository->countActive(),
         ];
 
         return $this->render('dashboard/index.html.twig', [

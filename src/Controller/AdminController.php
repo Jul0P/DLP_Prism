@@ -33,15 +33,7 @@ class AdminController extends AbstractController
 
         // Si un terme de recherche est fourni, filtrer les utilisateurs
         if ($search) {
-            $users = $userRepository->createQueryBuilder('u')
-                ->where('u.id LIKE :search')
-                ->orWhere('u.nom LIKE :search')
-                ->orWhere('u.prenom LIKE :search')
-                ->orWhere('u.email LIKE :search')
-                ->orWhere('u.roles LIKE :search')
-                ->setParameter('search', '%' . $search . '%')
-                ->getQuery()
-                ->getResult();
+            $users = $userRepository->findBySearch($search);
         } else {
             // Sinon, récupérer tous les utilisateurs
             $users = $userRepository->findAll();
