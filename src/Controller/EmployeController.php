@@ -22,21 +22,7 @@ class EmployeController extends AbstractController
 
         // Si un terme de recherche est fourni, filtrer les employés
         if ($search) {
-            $employes = $personneRepository->createQueryBuilder('p')
-                ->leftJoin('p.profils', 'pr')
-                ->leftJoin('p.entreprise', 'e')
-                ->where('p.id LIKE :search')
-                ->orWhere('p.nom LIKE :search')
-                ->orWhere('p.prenom LIKE :search')
-                ->orWhere('p.fonction LIKE :search')
-                ->orWhere('p.email LIKE :search')
-                ->orWhere('p.tel LIKE :search')
-                ->orWhere('pr.nom LIKE :search')
-                ->orWhere('e.rs LIKE :search')
-                ->setParameter('search', '%' . $search . '%')
-                ->distinct()
-                ->getQuery()
-                ->getResult();
+            $employes = $personneRepository->findBySearch($search);
         } else {
             // Sinon, récupérer tous les employés
             $employes = $personneRepository->findAll();

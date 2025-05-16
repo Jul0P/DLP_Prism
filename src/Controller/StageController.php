@@ -24,24 +24,7 @@ class StageController extends AbstractController
 
         // Si un terme de recherche est fourni, filtrer les stages
         if ($search) {
-            $stages = $stageRepository->createQueryBuilder('st')
-                ->leftJoin('st.etudiant', 'et')
-                ->leftJoin('st.entreprise', 'e')
-                ->leftJoin('st.specialite', 's')
-                ->leftJoin('st.employe', 'p')
-                ->where('st.id LIKE :search')
-                ->orWhere('st.dateDebut LIKE :search')
-                ->orWhere('st.dateFin LIKE :search')
-                ->orWhere('et.nom LIKE :search')
-                ->orWhere('et.prenom LIKE :search')
-                ->orWhere('e.rs LIKE :search')
-                ->orWhere('s.nom LIKE :search')
-                ->orWhere('p.nom LIKE :search')
-                ->orWhere('p.prenom LIKE :search')
-                ->setParameter('search', '%' . $search . '%')
-                ->distinct()
-                ->getQuery()
-                ->getResult();
+            $stages = $stageRepository->findBySearch($search);
         } else {
             // Sinon, récupérer tous les stages
             $stages = $stageRepository->findAll();
