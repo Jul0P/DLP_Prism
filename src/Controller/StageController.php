@@ -16,37 +16,29 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class StageController extends AbstractController
 {
+    public function __construct(private EntityManagerInterface $entityManager) {}
+
     #[Route('/stage', name: 'app_stage')]
     public function index(Request $request, StageRepository $stageRepository, EntrepriseRepository $entrepriseRepository, EtudiantRepository $etudiantRepository, SpecialiteRepository $specialiteRepository, PersonneRepository $personneRepository): Response
     {
         // Récupérer le terme de recherche depuis la requête
         $search = $request->query->get('search', '');
 
-        // Si un terme de recherche est fourni, filtrer les stages
-        if ($search) {
-            $stages = $stageRepository->findBySearch($search);
-        } else {
-            // Sinon, récupérer tous les stages
-            $stages = $stageRepository->findAll();
-        }
-
-        $entreprises = $entrepriseRepository->findAll();
-        $etudiants = $etudiantRepository->findAll();
-        $specialites = $specialiteRepository->findAll();
-        $personnes = $personneRepository->findAll();
+        // Si recherche, filtrer les stages, Sinon, récupérer tous les stages
+        $search ? $stages = $stageRepository->findBySearch($search) : $stages = $stageRepository->findAll();
 
         return $this->render('dashboard/stage.html.twig', [
             'search' => $search,
             'stages' => $stages,
-            'allEntreprises' => $entreprises,
-            'allEtudiants' => $etudiants,
-            'allSpecialites' => $specialites,
-            'allPersonnes' => $personnes,
+            'allEntreprises' => $entrepriseRepository->findAll(),
+            'allEtudiants' => $etudiantRepository->findAll(),
+            'allSpecialites' => $specialiteRepository->findAll(),
+            'allPersonnes' => $personneRepository->findAll(),
         ]);
     }
 
     #[Route('/stage/create', name: 'app_stage_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager, EntrepriseRepository $entrepriseRepository, EtudiantRepository $etudiantRepository, SpecialiteRepository $specialiteRepository, PersonneRepository $personneRepository): Response
+    public function create(Request $request, EntrepriseRepository $entrepriseRepository, EtudiantRepository $etudiantRepository, SpecialiteRepository $specialiteRepository, PersonneRepository $personneRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -73,19 +65,19 @@ class StageController extends AbstractController
             $personne = $personneId ? $personneRepository->find($personneId) : null;
             $stage->setEmploye($personne);
 
-            $entityManager->persist($stage);
-            $entityManager->flush();
+            $this->entityManager->persist($stage);
+            $this->entityManager->flush();
         }
 
         return $this->redirectToRoute('app_stage');
     }
 
     #[Route('/stage/{id}/edit', name: 'app_stage_edit', methods: ['POST'])]
-    public function edit(Request $request, int $id, EntityManagerInterface $entityManager, EntrepriseRepository $entrepriseRepository, EtudiantRepository $etudiantRepository, SpecialiteRepository $specialiteRepository, PersonneRepository $personneRepository): Response
+    public function edit(Request $request, int $id, EntrepriseRepository $entrepriseRepository, EtudiantRepository $etudiantRepository, SpecialiteRepository $specialiteRepository, PersonneRepository $personneRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        $stage = $entityManager->getRepository(Stage::class)->find($id);
+        $stage = $this->entityManager->getRepository(Stage::class)->find($id);
         if (!$stage) {
             throw $this->createNotFoundException('Aucun stage trouvé pour cet ID : ' . $id);
         }
@@ -112,21 +104,21 @@ class StageController extends AbstractController
             $personne = $personneId ? $personneRepository->find($personneId) : null;
             $stage->setEmploye($personne);
 
-            $entityManager->persist($stage);
-            $entityManager->flush();
+            $this->entityManager->persist($stage);
+            $this->entityManager->flush();
         }
 
         return $this->redirectToRoute('app_stage');
     }
 
     #[Route('/stage/{id}/delete', name: 'app_stage_delete', methods: ['POST'])]
-    public function delete(Request $request, Stage $stage, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Stage $stage): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         if ($this->isCsrfTokenValid('delete' . $stage->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($stage);
-            $entityManager->flush();
+            $this->entityManager->remove($stage);
+            $this->entityManager->flush();
         }
 
         return $this->redirectToRoute('app_stage');

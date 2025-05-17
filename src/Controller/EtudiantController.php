@@ -12,19 +12,16 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class EtudiantController extends AbstractController
 {
+    public function __construct(private EntityManagerInterface $entityManager) {}
+
     #[Route('/etudiant', name: 'app_etudiant')]
     public function index(Request $request, EtudiantRepository $etudiantRepository): Response
     {
         // Récupérer le terme de recherche depuis la requête
         $search = $request->query->get('search', '');
 
-        // Si un terme de recherche est fourni, filtrer les étudiants
-        if ($search) {
-            $etudiants = $etudiantRepository->findBySearch($search);
-        } else {
-            // Sinon, récupérer tous les étudiants
-            $etudiants = $etudiantRepository->findAll();
-        }
+        // Si recherche, filtrer les étudiants, Sinon, récupérer tous les étudiants
+        $search ? $etudiants = $etudiantRepository->findBySearch($search) : $etudiants = $etudiantRepository->findAll();
 
         return $this->render('dashboard/etudiant.html.twig', [
             'search' => $search,
@@ -33,7 +30,7 @@ class EtudiantController extends AbstractController
     }
 
     #[Route('/etudiant/create', name: 'app_etudiant_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): Response
+    public function create(Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -44,19 +41,19 @@ class EtudiantController extends AbstractController
             $etudiant->setEmail($request->request->get('email'));
             $etudiant->setTel($request->request->get('tel'));
 
-            $entityManager->persist($etudiant);
-            $entityManager->flush();
+            $this->entityManager->persist($etudiant);
+            $this->entityManager->flush();
         }
 
         return $this->redirectToRoute('app_etudiant');
     }
 
     #[Route('/etudiant/{id}/edit', name: 'app_etudiant_edit', methods: ['POST'])]
-    public function edit(Request $request, int $id, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        $etudiant = $entityManager->getRepository(Etudiant::class)->find($id);
+        $etudiant = $this->entityManager->getRepository(Etudiant::class)->find($id);
         if (!$etudiant) {
             throw $this->createNotFoundException('Aucun étudiant trouvé pour cet ID : ' . $id);
         }
@@ -67,21 +64,21 @@ class EtudiantController extends AbstractController
             $etudiant->setEmail($request->request->get('email'));
             $etudiant->setTel($request->request->get('tel'));
 
-            $entityManager->persist($etudiant);
-            $entityManager->flush();
+            $this->entityManager->persist($etudiant);
+            $this->entityManager->flush();
         }
 
         return $this->redirectToRoute('app_etudiant');
     }
 
     #[Route('/etudiant/{id}/delete', name: 'app_etudiant_delete', methods: ['POST'])]
-    public function delete(Request $request, Etudiant $etudiant, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Etudiant $etudiant): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         if ($this->isCsrfTokenValid('delete' . $etudiant->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($etudiant);
-            $entityManager->flush();
+            $this->entityManager->remove($etudiant);
+            $this->entityManager->flush();
         }
 
         return $this->redirectToRoute('app_etudiant');
