@@ -15,19 +15,16 @@ use App\Repository\PersonneRepository;
 
 class EntrepriseController extends AbstractController
 {
+    public function __construct(private EntityManagerInterface $entityManager) {}
+
     #[Route('/', name: 'app_entreprise')]
     public function index(Request $request, EntrepriseRepository $entrepriseRepository, PersonneRepository $personneRepository, PaysRepository $paysRepository, SpecialiteRepository $specialiteRepository): Response
     {
         // Récupérer le terme de recherche depuis la requête
         $search = $request->query->get('search', '');
 
-        // Si un terme de recherche est fourni, filtrer les entreprises
-        if ($search) {
-            $entreprises = $entrepriseRepository->findBySearch($search);
-        } else {
-            // Sinon, récupérer toutes les entreprises
-            $entreprises = $entrepriseRepository->findAll();
-        }
+        // Si recherche, filtrer les entreprises, Sinon, récupérer toutes les entreprises
+        $search ? $entreprises = $entrepriseRepository->findBySearch($search) : $entreprises = $entrepriseRepository->findAll();
 
         return $this->render('dashboard/entreprise.html.twig', [
             'entreprises' => $entreprises,
@@ -39,7 +36,7 @@ class EntrepriseController extends AbstractController
     }
 
     #[Route('/entreprise/create', name: 'app_entreprise_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager, PaysRepository $paysRepository, PersonneRepository $personneRepository, SpecialiteRepository $specialiteRepository): Response
+    public function create(Request $request, PaysRepository $paysRepository, PersonneRepository $personneRepository, SpecialiteRepository $specialiteRepository): Response
     {
         // Vérifier que l'utilisateur a les droits pour créer (ROLE_ADMIN)
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -78,8 +75,8 @@ class EntrepriseController extends AbstractController
             }
 
             // Enregistrer l'entreprise dans la base de données
-            $entityManager->persist($entreprise);
-            $entityManager->flush();
+            $this->entityManager->persist($entreprise);
+            $this->entityManager->flush();
         }
 
         // Rediriger vers la page du tableau de bord
@@ -87,7 +84,7 @@ class EntrepriseController extends AbstractController
     }
 
     #[Route('/entreprise/{id}/delete', name: 'app_entreprise_delete', methods: ['POST'])]
-    public function delete(Request $request, Entreprise $entreprise, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Entreprise $entreprise): Response
     {
         // Vérifier que l'utilisateur a les droits pour supprimer (ROLE_ADMIN)
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -95,8 +92,8 @@ class EntrepriseController extends AbstractController
         // Vérifier le jeton CSRF pour sécuriser la suppression
         if ($this->isCsrfTokenValid('delete'.$entreprise->getId(), $request->request->get('_token'))) {
             // Supprimer l'entreprise (les relations en cascade doivent être configurées dans Doctrine)
-            $entityManager->remove($entreprise);
-            $entityManager->flush();
+            $this->entityManager->remove($entreprise);
+            $this->entityManager->flush();
         }
 
         // Rediriger vers la page du tableau de bord
@@ -104,7 +101,7 @@ class EntrepriseController extends AbstractController
     }
 
     #[Route('/entreprise/{id}/edit', name: 'app_entreprise_edit', methods: ['POST'])]
-    public function edit(Request $request, int $id, EntityManagerInterface $entityManager, EntrepriseRepository $entrepriseRepository, PersonneRepository $personneRepository, PaysRepository $paysRepository, SpecialiteRepository $specialiteRepository): Response
+    public function edit(Request $request, int $id, EntrepriseRepository $entrepriseRepository, PersonneRepository $personneRepository, PaysRepository $paysRepository, SpecialiteRepository $specialiteRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -156,8 +153,8 @@ class EntrepriseController extends AbstractController
                 $entreprise->addSpecialite($specialite);
             }
 
-            $entityManager->persist($entreprise);
-            $entityManager->flush();
+            $this->entityManager->persist($entreprise);
+            $this->entityManager->flush();
         }
 
         // Rediriger vers la page du tableau de bord

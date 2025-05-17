@@ -13,10 +13,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 #[AsCommand(name: 'app:create-user')] // php bin/console app:create-user
 class CreateUserCommand extends Command
 {
-    public function __construct(
-        private EntityManagerInterface $entityManager,
-        private UserPasswordHasherInterface $passwordHasher
-    ) {
+    public function __construct(private EntityManagerInterface $entityManager, private UserPasswordHasherInterface $passwordHasher) {
         parent::__construct();
     }
 

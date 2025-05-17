@@ -13,6 +13,8 @@ use App\Entity\User;
 
 class AuthController extends AbstractController
 {
+    public function __construct(private EntityManagerInterface $entityManager) {}
+
     #[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
@@ -34,7 +36,7 @@ class AuthController extends AbstractController
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    public function register(Request $request, UserPasswordHasherInterface $passwordHasher): Response
     {
         $error = null;
 
@@ -44,9 +46,9 @@ class AuthController extends AbstractController
             $nom = $request->request->get('nom');
             $prenom = $request->request->get('prenom');
 
-            $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+            $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
             if ($existingUser) {
-                $error = 'Cet email est déjà utilisé.';
+                $error = 'Cet email est déjà utilisé';
             } else {
                 $user = new User();
                 $user->setEmail($email);
@@ -56,9 +58,8 @@ class AuthController extends AbstractController
                 $user->setPassword($hashedPassword);
                 $user->setRoles(['ROLE_USER']);
 
-                $entityManager->persist($user);
-
-                $entityManager->flush();
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
 
                 return $this->redirectToRoute('app_login');
             }

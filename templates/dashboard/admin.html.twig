@@ -635,7 +635,7 @@
                     const row = document.querySelector(`#profil-table tr[data-id="${id}"]`);
                     if (row) {
                         document.getElementById('edit-profil-nom').value = row.getAttribute('data-profil-nom');
-                        editProfilForm.action = `/admin/profils/${id}/edit`; // Ajustez selon votre route
+                        editProfilForm.action = `/admin/profil/${id}/edit`; // Ajustez selon votre route
                         openDialog(dialogEditProfil);
                     }
                 });
