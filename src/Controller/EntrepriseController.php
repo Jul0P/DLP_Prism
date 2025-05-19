@@ -20,10 +20,8 @@ class EntrepriseController extends AbstractController
     #[Route('/', name: 'app_entreprise')]
     public function index(Request $request, EntrepriseRepository $entrepriseRepository, PersonneRepository $personneRepository, PaysRepository $paysRepository, SpecialiteRepository $specialiteRepository): Response
     {
-        // Récupérer le terme de recherche depuis la requête
         $search = $request->query->get('search', '');
 
-        // Si recherche, filtrer les entreprises, Sinon, récupérer toutes les entreprises
         $search ? $entreprises = $entrepriseRepository->findBySearch($search) : $entreprises = $entrepriseRepository->findAll();
 
         return $this->render('dashboard/entreprise.html.twig', [
@@ -38,11 +36,9 @@ class EntrepriseController extends AbstractController
     #[Route('/entreprise/create', name: 'app_entreprise_create', methods: ['POST'])]
     public function create(Request $request, PaysRepository $paysRepository, PersonneRepository $personneRepository, SpecialiteRepository $specialiteRepository): Response
     {
-        // Vérifier que l'utilisateur a les droits pour créer (ROLE_ADMIN)
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         if ($request->isMethod('POST')) {
-            // Créer une nouvelle instance d'Entreprise
             $entreprise = new Entreprise();
             $entreprise->setRs($request->request->get('rs'));
             $entreprise->setRue($request->request->get('rue'));
@@ -51,7 +47,6 @@ class EntrepriseController extends AbstractController
             $entreprise->setTel($request->request->get('tel'));
             $entreprise->setMail($request->request->get('mail'));
 
-            // Gérer le champ pays
             $paysId = $request->request->get('pays');
             $pays = $paysId ? $paysRepository->find($paysId) : null;
             if ($paysId && !$pays) {
@@ -60,43 +55,35 @@ class EntrepriseController extends AbstractController
             }
             $entreprise->setPays($pays);
 
-            // Gérer les employés
-            $employeIds = $request->request->all('employes'); // Utiliser all() pour récupérer un tableau
+            $employeIds = $request->request->all('employes'); 
             $employes = $personneRepository->findBy(['id' => $employeIds]);
             foreach ($employes as $employe) {
                 $entreprise->addPersonne($employe);
             }
 
-            // Gérer les spécialités
             $specialiteIds = $request->request->all('profils') ?: [];
             $specialites = $specialiteRepository->findBy(['id' => $specialiteIds]);
             foreach ($specialites as $specialite) {
                 $entreprise->addSpecialite($specialite);
             }
 
-            // Enregistrer l'entreprise dans la base de données
             $this->entityManager->persist($entreprise);
             $this->entityManager->flush();
         }
 
-        // Rediriger vers la page du tableau de bord
         return $this->redirectToRoute('app_entreprise');
     }
 
     #[Route('/entreprise/{id}/delete', name: 'app_entreprise_delete', methods: ['POST'])]
     public function delete(Request $request, Entreprise $entreprise): Response
     {
-        // Vérifier que l'utilisateur a les droits pour supprimer (ROLE_ADMIN)
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        // Vérifier le jeton CSRF pour sécuriser la suppression
         if ($this->isCsrfTokenValid('delete'.$entreprise->getId(), $request->request->get('_token'))) {
-            // Supprimer l'entreprise (les relations en cascade doivent être configurées dans Doctrine)
             $this->entityManager->remove($entreprise);
             $this->entityManager->flush();
         }
 
-        // Rediriger vers la page du tableau de bord
         return $this->redirectToRoute('app_entreprise');
     }
 
@@ -105,14 +92,12 @@ class EntrepriseController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        // Récupérer l'entreprise à partir de l'ID
         $entreprise = $entrepriseRepository->find($id);
         if (!$entreprise) {
             throw $this->createNotFoundException('Aucune entreprise trouvée pour cet ID : '.$id);
         }
 
         if ($request->isMethod('POST')) {
-            // Mettre à jour les champs simples
             $entreprise->setRs($request->request->get('rs'));
             $entreprise->setRue($request->request->get('rue'));
             $entreprise->setCp($request->request->get('cp'));
@@ -120,7 +105,6 @@ class EntrepriseController extends AbstractController
             $entreprise->setTel($request->request->get('tel'));
             $entreprise->setMail($request->request->get('mail'));
 
-            // Gérer le champ pays
             $paysId = $request->request->get('pays');
             $pays = $paysId ? $paysRepository->find($paysId) : null;
             if ($paysId && !$pays) {
@@ -129,8 +113,7 @@ class EntrepriseController extends AbstractController
             }
             $entreprise->setPays($pays);
 
-            // Mettre à jour les employes
-            $employeIds = $request->request->all('employes'); // Utiliser all() pour récupérer un tableau
+            $employeIds = $request->request->all('employes');
             $employes = $personneRepository->findBy(['id' => $employeIds]);
 
             // Supprime les anciens employes
@@ -145,7 +128,6 @@ class EntrepriseController extends AbstractController
                 $entreprise->addPersonne($employe);
             }
 
-            // --- Mettre à jour les profils (spécialités) ---
             $specialiteIds = $request->request->all('profils') ?: [];
             $specialites = $specialiteRepository->findBy(['id' => $specialiteIds]);
             $entreprise->getSpecialites()->clear();
@@ -157,7 +139,6 @@ class EntrepriseController extends AbstractController
             $this->entityManager->flush();
         }
 
-        // Rediriger vers la page du tableau de bord
         return $this->redirectToRoute('app_entreprise');
     }
 }

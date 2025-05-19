@@ -19,10 +19,8 @@ class EmployeController extends AbstractController
     #[Route('/employe', name: 'app_employe')]
     public function index(Request $request, PersonneRepository $personneRepository, EntrepriseRepository $entrepriseRepository, ProfilRepository $profilRepository): Response
     {
-        // Récupérer le terme de recherche depuis la requête
         $search = $request->query->get('search', '');
 
-        // Si recherche, filtrer les employés, Sinon, récupérer tous les employés
         $search ? $employes = $personneRepository->findBySearch($search) : $employes = $personneRepository->findAll();
 
         return $this->render('dashboard/employe.html.twig', [
