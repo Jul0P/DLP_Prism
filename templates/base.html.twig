@@ -12,7 +12,7 @@
         </script>
         <link rel="stylesheet" href="{{ asset('css/normalize.css') }}">
         <link rel="stylesheet" href="{{ asset('css/reset.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ 'now'|date('U') }}"> {# TODO: Paramètre de requête pour forcer le navigateur à recharger le fichier CSS à retirer en production #}
+        <link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ 'now'|date('U') }}">
         <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
         {% block stylesheets %}{% endblock %}
     </head>

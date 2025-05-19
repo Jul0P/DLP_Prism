@@ -63,7 +63,6 @@
 {% block title %}Prism - Administration{% endblock %}
 
 {% block main %}
-    <!-- Liste des utilisateurs -->
     <div class="table-header">
         <h2 class="title">Liste des utilisateurs</h2>
         <p class="subtitle">Gérez les utilisateurs de l'application</p>
@@ -127,7 +126,6 @@
                     </tbody>
                 </table>
 
-                <!-- Dialogue Ajouter Utilisateur -->
                 <div id="dialog-add-user" class="dialog" data-state="closed">
                     <div class="dialog-overlay"></div>
                     <div class="dialog-content">
@@ -173,7 +171,6 @@
                     </div>
                 </div>
 
-                <!-- Dialogue Modifier Utilisateur -->
                 <div id="dialog-edit-user" class="dialog" data-state="closed">
                     <div class="dialog-overlay"></div>
                     <div class="dialog-content">
@@ -224,9 +221,7 @@
         </div>
     </div>
 
-    <!-- Sections pour Pays, Spécialités, Profils -->
     <div class="flex table-sections">
-        <!-- Liste des pays -->
         <div class="table-section">
             <div class="table-header">
                 <h2 class="title">Liste des pays</h2>
@@ -273,7 +268,6 @@
                             </tbody>
                         </table>
 
-                        <!-- Dialogue Ajouter Pays -->
                         <div id="dialog-add-pays" class="dialog" data-state="closed">
                             <div class="dialog-overlay"></div>
                             <div class="dialog-content">
@@ -296,7 +290,6 @@
                             </div>
                         </div>
 
-                        <!-- Dialogue Modifier Pays -->
                         <div id="dialog-edit-pays" class="dialog" data-state="closed">
                             <div class="dialog-overlay"></div>
                             <div class="dialog-content">
@@ -327,7 +320,6 @@
 
         <div class="separator-vertical"></div>
 
-        <!-- Liste des spécialités -->
         <div class="table-section">
             <div class="table-header">
                 <h2 class="title">Liste des spécialités</h2>
@@ -374,7 +366,6 @@
                             </tbody>
                         </table>
 
-                        <!-- Dialogue Ajouter Spécialité -->
                         <div id="dialog-add-specialite" class="dialog" data-state="closed">
                             <div class="dialog-overlay"></div>
                             <div class="dialog-content">
@@ -397,7 +388,6 @@
                             </div>
                         </div>
 
-                        <!-- Dialogue Modifier Spécialité -->
                         <div id="dialog-edit-specialite" class="dialog" data-state="closed">
                             <div class="dialog-overlay"></div>
                             <div class="dialog-content">
@@ -428,7 +418,6 @@
 
         <div class="separator-vertical"></div>
 
-        <!-- Liste des profils -->
         <div class="table-section">
             <div class="table-header">
                 <h2 class="title">Liste des profils</h2>
@@ -475,7 +464,6 @@
                             </tbody>
                         </table>
 
-                        <!-- Dialogue Ajouter Profil -->
                         <div id="dialog-add-profil" class="dialog" data-state="closed">
                             <div class="dialog-overlay"></div>
                             <div class="dialog-content">
@@ -498,7 +486,6 @@
                             </div>
                         </div>
 
-                        <!-- Dialogue Modifier Profil -->
                         <div id="dialog-edit-profil" class="dialog" data-state="closed">
                             <div class="dialog-overlay"></div>
                             <div class="dialog-content">
@@ -549,7 +536,6 @@
                 el.addEventListener('click', closeDialog);
             });
 
-            // --- Utilisateurs ---
             const dialogAddUser = document.getElementById('dialog-add-user');
             const dialogEditUser = document.getElementById('dialog-edit-user');
             const editUserForm = document.getElementById('edit-user-form');
@@ -568,7 +554,7 @@
                             checkbox.checked = roles.includes(checkbox.value);
                         });
 
-                        editUserForm.action = `/admin/user/${id}/edit`; // Ajustez selon votre route
+                        editUserForm.action = `/admin/user/${id}/edit`; // autre méthode
                         openDialog(dialogEditUser);
                     }
                 });
@@ -580,7 +566,6 @@
                 openDialog(dialogAddUser);
             });
 
-            // --- Pays ---
             const dialogAddPays = document.getElementById('dialog-add-pays');
             const dialogEditPays = document.getElementById('dialog-edit-pays');
             const editPaysForm = document.getElementById('edit-pays-form');
@@ -591,7 +576,7 @@
                     const row = document.querySelector(`#pays-table tr[data-id="${id}"]`);
                     if (row) {
                         document.getElementById('edit-pays-nom').value = row.getAttribute('data-pays-nom');
-                        editPaysForm.action = `/admin/pays/${id}/edit`; // Ajustez selon votre route
+                        editPaysForm.action = `/admin/pays/${id}/edit`; // autre méthode
                         openDialog(dialogEditPays);
                     }
                 });
@@ -602,7 +587,6 @@
                 openDialog(dialogAddPays);
             });
 
-            // --- Spécialités ---
             const dialogAddSpecialite = document.getElementById('dialog-add-specialite');
             const dialogEditSpecialite = document.getElementById('dialog-edit-specialite');
             const editSpecialiteForm = document.getElementById('edit-specialite-form');
@@ -613,7 +597,7 @@
                     const row = document.querySelector(`#specialite-table tr[data-id="${id}"]`);
                     if (row) {
                         document.getElementById('edit-specialite-nom').value = row.getAttribute('data-specialite-nom');
-                        editSpecialiteForm.action = `/admin/specialite/${id}/edit`; // Ajustez selon votre route
+                        editSpecialiteForm.action = `/admin/specialite/${id}/edit`; // autre méthode
                         openDialog(dialogEditSpecialite);
                     }
                 });
@@ -624,7 +608,6 @@
                 openDialog(dialogAddSpecialite);
             });
 
-            // --- Profils ---
             const dialogAddProfil = document.getElementById('dialog-add-profil');
             const dialogEditProfil = document.getElementById('dialog-edit-profil');
             const editProfilForm = document.getElementById('edit-profil-form');
@@ -635,7 +618,7 @@
                     const row = document.querySelector(`#profil-table tr[data-id="${id}"]`);
                     if (row) {
                         document.getElementById('edit-profil-nom').value = row.getAttribute('data-profil-nom');
-                        editProfilForm.action = `/admin/profil/${id}/edit`; // Ajustez selon votre route
+                        editProfilForm.action = `/admin/profil/${id}/edit`; // autre méthode
                         openDialog(dialogEditProfil);
                     }
                 });

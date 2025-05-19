@@ -31,10 +31,8 @@ class AdminController extends AbstractController
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        // Récupérer le terme de recherche depuis la requête
         $search = $request->query->get('search', '');
 
-        // Si recherche, filtrer les utilisateurs, Sinon récupérer tous les utilisateurs
         $search ? $users = $userRepository->findBySearch($search) : $users = $userRepository->findAll();
 
         return $this->render('dashboard/admin.html.twig', [
@@ -46,7 +44,6 @@ class AdminController extends AbstractController
         ]);
     }
 
-    // Création d'un utilisateur
     #[Route('/admin/user/create', name: 'app_admin_user_create', methods: ['POST'])]
     public function createUser(Request $request): Response
     {
@@ -59,6 +56,7 @@ class AdminController extends AbstractController
             $user->setEmail($request->request->get('email'));
             
             $roles = $request->request->all('user_roles');
+            // Assurer que les rôles sont uniques et non vides
             $roles = is_array($roles) && !empty($roles) ? array_unique(array_filter($roles)) : ['ROLE_USER'];
             $user->setRoles($roles);
             
@@ -73,7 +71,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Modification d'un utilisateur
     #[Route('/admin/user/{id}/edit', name: 'app_admin_user_edit', methods: ['POST'])]
     public function editUser(Request $request, int $id): Response
     {
@@ -90,6 +87,7 @@ class AdminController extends AbstractController
             $user->setEmail($request->request->get('email'));
             
             $roles = $request->request->all('user_roles');
+            // Assurer que les rôles sont uniques et non vides
             $roles = is_array($roles) && !empty($roles) ? array_unique(array_filter($roles)) : ['ROLE_USER'];
             $user->setRoles($roles);
 
@@ -106,7 +104,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Suppression d'un utilisateur
     #[Route('/admin/user/{id}/delete', name: 'app_admin_user_delete', methods: ['POST'])]
     public function deleteUser(Request $request, User $user): Response
     {
@@ -120,7 +117,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Création d'un pays
     #[Route('/admin/pays/create', name: 'app_admin_pays_create', methods: ['POST'])]
     public function createPays(Request $request): Response
     {
@@ -137,7 +133,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Modification d'un pays
     #[Route('/admin/pays/{id}/edit', name: 'app_admin_pays_edit', methods: ['POST'])]
     public function editPays(Request $request, int $id): Response
     {
@@ -158,7 +153,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Suppression d'un pays
     #[Route('/admin/pays/{id}/delete', name: 'app_admin_pays_delete', methods: ['POST'])]
     public function deletePays(Request $request, Pays $pays): Response
     {
@@ -172,7 +166,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Création d'une spécialité
     #[Route('/admin/specialite/create', name: 'app_admin_specialite_create', methods: ['POST'])]
     public function createSpecialite(Request $request): Response
     {
@@ -189,7 +182,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Modification d'une spécialité
     #[Route('/admin/specialite/{id}/edit', name: 'app_admin_specialite_edit', methods: ['POST'])]
     public function editSpecialite(Request $request, int $id): Response
     {
@@ -210,7 +202,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Suppression d'une spécialité
     #[Route('/admin/specialite/{id}/delete', name: 'app_admin_specialite_delete', methods: ['POST'])]
     public function deleteSpecialite(Request $request, Specialite $specialite): Response
     {
@@ -224,7 +215,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Création d'un profil
     #[Route('/admin/profil/create', name: 'app_admin_profil_create', methods: ['POST'])]
     public function createProfil(Request $request): Response
     {
@@ -241,7 +231,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Modification d'un profil
     #[Route('/admin/profil/{id}/edit', name: 'app_admin_profil_edit', methods: ['POST'])]
     public function editProfil(Request $request, int $id): Response
     {
@@ -262,7 +251,6 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('app_admin');
     }
 
-    // Suppression d'un profil
     #[Route('/admin/profil/{id}/delete', name: 'app_admin_profil_delete', methods: ['POST'])]
     public function deleteProfil(Request $request, Profil $profil): Response
     {

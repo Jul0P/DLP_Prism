@@ -88,7 +88,6 @@
                     </tbody>
                 </table>
 
-                <!-- Dialogue Voir -->
                 <div id="dialog-view" class="dialog" data-state="closed">
                     <div class="dialog-overlay"></div>
                     <div class="dialog-content">
@@ -115,7 +114,6 @@
                     </div>
                 </div>
 
-                <!-- Dialogue Modifier -->
                 <div id="dialog-edit" class="dialog" data-state="closed">
                     <div class="dialog-overlay"></div>
                     <div class="dialog-content">
@@ -161,7 +159,6 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                {# Profils : Cases à cocher (inchangé) #}
                                 <div class="form-group">
                                     <label class="form-label">Profils :</label>
                                     <div id="edit-profils" class="checkbox-group-inline">
@@ -181,7 +178,6 @@
                     </div>
                 </div>
 
-                <!-- Dialogue Ajouter -->
                 <div id="dialog-add" class="dialog" data-state="closed">
                     <div class="dialog-overlay"></div>
                     <div class="dialog-content">
@@ -227,7 +223,6 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                {# Profils : Cases à cocher (inchangé) #}
                                 <div class="form-group">
                                     <label class="form-label">Profils :</label>
                                     <div id="add-profils" class="checkbox-group-inline">
@@ -262,20 +257,22 @@
             const dialogAdd = document.getElementById('dialog-add');
             const editForm = document.getElementById('edit-employe-form');
 
+            // Fonction pour ouvrir un dialogue
             function openDialog(dialog) {
                 document.querySelectorAll('.dialog').forEach(d => d.setAttribute('data-state', 'closed'));
                 dialog.setAttribute('data-state', 'open');
             }
 
+            // Fonction pour fermer tous les dialogues
             function closeDialog() {
                 document.querySelectorAll('.dialog').forEach(d => d.setAttribute('data-state', 'closed'));
             }
 
+            // Gestion du clic sur l'icône de fermeture et l'overlay
             document.querySelectorAll('.dialog-close-icon, .dialog-overlay').forEach(el => {
                 el.addEventListener('click', closeDialog);
             });
 
-            // Gestion du clic sur le bouton "Voir"
             document.querySelectorAll('.view-button').forEach(button => {
                 button.addEventListener('click', function () {
                     const id = this.getAttribute('data-id');
@@ -310,7 +307,6 @@
                         document.getElementById('edit-tel').value = row.getAttribute('data-tel');
                         document.getElementById('edit-entreprise').value = row.getAttribute('data-entreprise-id');
 
-                        // Sélectionner les profils (cases à cocher)
                         const profilCheckboxes = document.querySelectorAll('#edit-profils input[type="checkbox"]');
                         profilCheckboxes.forEach(checkbox => {
                             checkbox.checked = selectedProfils.includes(parseInt(checkbox.value));

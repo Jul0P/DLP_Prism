@@ -20,7 +20,6 @@
             {% endif %}
         </div>
         <div class="table-wrapper">
-            {# Vérifie si le tableau des entreprises contient au moins une entrée avant d'afficher le tableau #}
             {% if entreprises|length > 0 %}
                 <table class="table">
                     <thead>
@@ -133,7 +132,6 @@
                     </tbody>
                 </table>
 
-                {# Dialogue "Voir" générique #}
                 <div id="dialog-view" class="dialog" data-state="closed">
                     <div class="dialog-overlay"></div>
                     <div class="dialog-content">
@@ -168,7 +166,6 @@
                     </div>
                 </div>
 
-                {# Dialogue "Modifier" générique #}
                 <div id="dialog-edit" class="dialog" data-state="closed">
                     <div class="dialog-overlay"></div>
                     <div class="dialog-content">
@@ -219,7 +216,6 @@
                                         <input type="text" id="edit-tel" name="tel" class="form-input">
                                     </div>
                                 </div>
-                                {# Employés : Utilisation d'un select multiple #}
                                 <div class="form-group">
                                     <label for="edit-employes" class="form-label">Employés :</label>
                                     <select id="edit-employes" name="employes[]" multiple class="form-select form-select-tall">
@@ -228,7 +224,6 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                {# Profils : Cases à cocher (inchangé) #}
                                 <div class="form-group">
                                     <label class="form-label">Profils :</label>
                                     <div id="edit-profils" class="checkbox-group-inline">
@@ -248,7 +243,6 @@
                     </div>
                 </div>
 
-                {# Dialogue "Ajouter" générique #}
                 <div id="dialog-add" class="dialog" data-state="closed">
                     <div class="dialog-overlay"></div>
                     <div class="dialog-content">
@@ -299,7 +293,6 @@
                                         <input type="text" id="add-tel" name="tel" class="form-input">
                                     </div>
                                 </div>
-                                {# Employés : Utilisation d'un select multiple #}
                                 <div class="form-group">
                                     <label for="add-employes" class="form-label">Employés :</label>
                                     <select id="add-employes" name="employes[]" multiple class="form-select form-select-tall">
@@ -308,7 +301,6 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                {# Profils : Cases à cocher (inchangé) #}
                                 <div class="form-group">
                                     <label class="form-label">Profils :</label>
                                     <div id="add-profils" class="checkbox-group-inline">
@@ -360,7 +352,6 @@
                 element.addEventListener('click', closeDialog);
             });
 
-            // Gestion du clic sur le bouton "Voir"
             document.querySelectorAll('.action-button.view-button').forEach(button => {
                 button.addEventListener('click', function () {
                     const id = this.getAttribute('data-id');
@@ -390,7 +381,6 @@
                 });
             });
 
-            // Gestion du clic sur le bouton "Modifier"
             document.querySelectorAll('.action-button.edit-button').forEach(button => {
                 button.addEventListener('click', function () {
                     const id = this.getAttribute('data-id');
@@ -401,6 +391,7 @@
                         let rue = '';
                         let cp = '';
                         let ville = '';
+                        // Extraire la rue, le code postal et la ville de l'adresse complète avec une expression régulière
                         const adresseMatch = adresseFull.match(/^(.*?)(\d{5})\s+(.+)$/);
                         if (adresseMatch) {
                             rue = adresseMatch[1].trim();
@@ -415,7 +406,6 @@
                         const selectedSpecialites = JSON.parse(row.getAttribute('data-specialites') || '[]');
                         const paysId = row.getAttribute('data-pays-id') || '';
 
-                        // Remplir les champs texte
                         document.getElementById('edit-rs').value = rs;
                         document.getElementById('edit-rue').value = rue;
                         document.getElementById('edit-cp').value = cp;
@@ -424,31 +414,24 @@
                         document.getElementById('edit-mail').value = mail;
                         document.getElementById('edit-pays').value = paysId;
 
-                        // Remplir les sélections multiples
                         const employesSelect = document.getElementById('edit-employes');
                         Array.from(employesSelect.options).forEach(option => {
                             option.selected = selectedemployes.includes(option.value);
                         });
 
-                        // Sélectionner les profils (cases à cocher)
                         const profilCheckboxes = document.querySelectorAll('#edit-profils input[type="checkbox"]');
                         profilCheckboxes.forEach(checkbox => {
                             checkbox.checked = selectedSpecialites.includes(parseInt(checkbox.value));
                         });
 
-                        // Mettre à jour l'action du formulaire
                         editForm.action = "{{ path('app_entreprise_edit', {'id': 'placeholder'}) }}".replace('placeholder', id);
-
                         openDialog(dialogEdit);
                     }
                 });
             });
 
-            // Gestion du clic sur le bouton "Ajouter"
             document.querySelector('.add-button').addEventListener('click', function () {
-                // Réinitialiser le formulaire d'ajout
                 document.getElementById('add-entreprise-form').reset();
-                // Mettre à jour l'action du formulaire
                 const addForm = document.getElementById('add-entreprise-form');
                 addForm.action = "{{ path('app_entreprise_create') }}";
                 openDialog(document.getElementById('dialog-add'));

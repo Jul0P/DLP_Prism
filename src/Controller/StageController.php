@@ -21,10 +21,8 @@ class StageController extends AbstractController
     #[Route('/stage', name: 'app_stage')]
     public function index(Request $request, StageRepository $stageRepository, EntrepriseRepository $entrepriseRepository, EtudiantRepository $etudiantRepository, SpecialiteRepository $specialiteRepository, PersonneRepository $personneRepository): Response
     {
-        // Récupérer le terme de recherche depuis la requête
         $search = $request->query->get('search', '');
 
-        // Si recherche, filtrer les stages, Sinon, récupérer tous les stages
         $search ? $stages = $stageRepository->findBySearch($search) : $stages = $stageRepository->findAll();
 
         return $this->render('dashboard/stage.html.twig', [

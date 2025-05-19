@@ -17,10 +17,8 @@ class EtudiantController extends AbstractController
     #[Route('/etudiant', name: 'app_etudiant')]
     public function index(Request $request, EtudiantRepository $etudiantRepository): Response
     {
-        // Récupérer le terme de recherche depuis la requête
         $search = $request->query->get('search', '');
 
-        // Si recherche, filtrer les étudiants, Sinon, récupérer tous les étudiants
         $search ? $etudiants = $etudiantRepository->findBySearch($search) : $etudiants = $etudiantRepository->findAll();
 
         return $this->render('dashboard/etudiant.html.twig', [
